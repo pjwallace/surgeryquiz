@@ -1,0 +1,81 @@
+body{
+    background-color: rgb(237, 234, 222);
+}
+
+.login-container, .register-container{
+    width: 100%; 
+    max-width: 400px; /* Constrain width for larger screens */
+    padding: 20px; 
+    margin-top: 0; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: aliceblue; 
+    border-radius: 8px; /* Add rounded corners for a modern look */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow for depth */
+}
+
+h5{
+    margin-bottom: 15px;
+}
+
+.pass-word{
+    margin-top: 10px;
+}
+
+a{
+    text-decoration: none;
+}
+
+.register-span{
+    margin-top: 10px;
+}
+/*
+.register-container{
+    width: 40%;
+    height: auto;
+    margin: auto;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: aliceblue;
+    border: 1px solid green;
+    padding: 15px;
+}
+*/
+.form-container {
+    width: 100%; /* Ensure the form takes the full width of the container */
+}
+
+.profile-container{
+    width: 90%;
+    max-width: 600px;
+    height: calc(100vh - 55px);
+    margin: 20px auto; 
+    overflow-y: auto;
+    background-color: aliceblue;   
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+#profile-form-container {
+    width: 100%; 
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.form-group input {
+    width: 100%; 
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    padding: 10px; 
+    margin-bottom: 15px; 
+}
+
+input[readonly] {
+    background-color: lightgrey;
+    color: #666; 
+    cursor: not-allowed; 
+}

@@ -1,0 +1,115 @@
+{% extends "learners/profile_base.html" %}
+
+{% block body %}
+    <div class="container vh-100 d-flex flex-column justify-content-center">
+        <div class="d-flex justify-content-center">
+            <div class="profile-container bg-light p-4 rounded shadow-sm w-100">
+                <div class="error-msg">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {{ message.tags }} mb-3" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <h3 class="text-center mb-4">Edit Your Profile</h3>
+
+                <div id="profile-form-container">
+                    <form action="{% url 'edit_profile' %}" method="post">
+                        {% csrf_token %}               
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.first_name.label_tag }}                    
+                                {{ profile_form.first_name }}
+                                {% for error in profile_form.first_name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.last_name.label_tag }}                    
+                                {{ profile_form.last_name }}
+                                {% for error in profile_form.last_name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.preferred_name.label_tag }}
+                                {{ profile_form.preferred_name }}
+                                {% for error in profile_form.preferred_name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.current_email.label_tag }}
+                                {{ profile_form.current_email }}
+                                {% for error in profile_form.current_email.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.new_email.label_tag }}
+                                {{ profile_form.new_email }}
+                                {% for error in profile_form.new_email.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.residency_program.label_tag }}
+                                {{ profile_form.residency_program }}
+                                {% for error in profile_form.residency_program.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.pg_level.label_tag }}
+                                {{ profile_form.pg_level }}
+                                {% for error in profile_form.pg_level.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                {{ profile_form.cell_phone.label_tag }}
+                                {{ profile_form.cell_phone }}
+                                {% for error in profile_form.cell_phone.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12 d-flex flex-column flex-sm-row justify-content-center gap-2">
+                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                                <a type="button" class="btn btn-warning" href="{% url 'dashboard' %}">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
