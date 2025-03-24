@@ -1,0 +1,235 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Self Assessment Dashboard{% endblock %}</title>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token }}">
+        
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+            crossorigin="anonymous">
+
+        <link rel="stylesheet" 
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+               
+        <link href="{% static 'quizes/styles.css' %}" rel="stylesheet">
+                 
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <h2 class="navbar-brand" id="brand">Student Dashboard</h2>
+            <button 
+                class="navbar-toggler ms-auto" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarContent" 
+                aria-controls="navbarContent" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse"  id="navbarContent">
+                <ul class="navbar-nav ms-auto">                    
+                    <li class="nav-item dropdown">
+                        <a 
+                            class="nav-link dropdown-toggle text-end" 
+                            href="#" 
+                            id="user-dropdown" 
+                            role="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                        >
+                            <i class="fa fa-solid fa-user" id="user-icon"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end text-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a></li>
+                            {% if request.user.is_superuser or request.user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'management_portal' %}">Manage Database</a></li>
+                            {% endif %}
+                            
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-end" id="logout-link"  href="{% url 'logout' %}">Log Out</a>
+                    </li>
+                </ul>
+            </div>
+        </nav> 
+
+        <div class="container-fluid vh-100 d-flex flex-column align-items-center">
+            <div class="body" id="dashboard-container"> 
+            
+                <div id="dashboard-msg" class="msg-div"></div>
+
+                <h2 class="text-center fs-2 fs-md-3 my-3">{{ request.user}}'s Dashboard</h2>
+                <p class="text-center fs-5 fs-md-6 mb-4" id="choose-assessment">Choose your assessment from the available topics:</p>
+
+                <!-- Bootstrap Grid-->
+                <div class="container">
+                
+                    <!-- topic list-->
+                    <div class="row">
+                        {% for topic in topics %}
+                        
+                            <div class="col-md-12 col-sm-12 topics-list topics" id="topic-{{ topic.id }}" 
+                                    data-topic-id="{{ topic.id }}">
+                                    <span>
+                                        <i class="fa fa-regular fa-plus" id="plus-{{ topic.id }}"
+                                            style="display: block;"></i>
+                                        <i class="fa fa-regular fa-minus" id="minus-{{ topic.id }}" 
+                                            style="display: none;"></i>
+                                    </span>
+                                <span>{{ topic.name }}</span>                                    
+                            </div>
+
+                            {% if topic.filtered_subtopics %}
+                                <!-- subtopics list-->
+                                <div class="subtopics-list" id="subtopicscontainer-{{ topic.id }}"
+                                    style="display: none;">
+                                    <!-- subtopics header-->
+                                    <div class="row column-header">
+                                        <div class="col-md-4" id="subtopic-header">
+                                            <span id="subtopic-name">
+                                                Subtopic
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2" id="status-header">
+                                            <span id="subtopic-status">
+                                                Status
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2" id="progress-header">
+                                            <span id="subtopic-progress">
+                                                Progress
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2" id="score-header">
+                                            <span id="subtopic-score">
+                                                Score
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4" id="review-header">
+                                            <span id="subtopic-review">
+                                                Review/Retake
+                                            </span>
+                                        </div>                                    
+                                    </div>
+                                    {% for subtopic in topic.filtered_subtopics %}
+                                        <div class="row subtopics-row">
+                                            <div class="col-md-4 subtopics">
+                                                <span>{{ subtopic.name }}</span>
+                                            </div>
+                                            <!-- status column-->
+                                            <div class="col-md-2 status-column">
+                                                {% if not subtopic.progress_record %}
+                                                    <!-- Quiz hasn't been attempted. Show start button-->                                                     
+                                                    <a href="{% url 'load_quiz_layout' subtopic.id topic.id %}?button_type=start"
+                                                        class="btn btn-sm btn-success">Start</a>
+                                                                                                    
+                                                {% elif subtopic.progress_record.questions_answered < subtopic.question_count %}
+                                                    <!-- Quiz in progress. Show resume button-->
+                                                    <a href="{% url 'load_quiz_layout' subtopic.id topic.id %}?button_type=resume"
+                                                        class="btn btn-sm btn-primary">Resume</a>
+
+                                                {% else %}
+                                                    <!-- Quiz complete-->
+                                                    <span>Complete</span>
+
+                                                {% endif %}
+                                            </div>
+                                            <!-- progress column -->
+                                            <div class="col-md-2 progress-column">
+                                                {% if not subtopic.progress_record %}
+                                                    <span>Not Started</span>
+                                                {% else %}
+                                                    <div class="questions-text">
+                                                        <span>Questions</span>
+                                                        <span id="questions-progress">{{ subtopic.progress_record.questions_answered }}
+                                                            of {{ subtopic.question_count }}
+                                                        </span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <!-- score column -->
+                                            <div class="col-md-2 score-column">
+                                                {% if not subtopic.progress_record %}
+                                                    <div class="score-dash">
+                                                        <i class="fa fa-solid fa-minus minus-bigger"></i>
+                                                        <i class="fa fa-solid fa-minus minus-bigger"></i>
+                                                    </div>
+                                                {% else %}
+                                                    <div>
+                                                        <div class="score-label">
+                                                            <span>Initial</span>
+                                                            <span>Latest</span>
+                                                        </div>
+                                                        <div class="score-results">
+                                                            <span>{{ subtopic.progress_record.initial_score|default:0 }}%</span>
+                                                            <span>{{ subtopic.progress_record.latest_score|default:0 }}%</span>
+                                                        </div>
+
+                                                    </div>
+                                                {% endif %}
+
+                                            </div>
+                                            <!-- review/retake column -->
+                                            <div class="col-md-2 review-column">
+                                                {% if not subtopic.progress_record or subtopic.progress_record.questions_answered != subtopic.question_count %}
+                                                    <div class="review-minus">
+                                                        <i class="fa fa-solid fa-minus minus-bigger"></i>
+                                                    </div>
+                                                {% elif subtopic.progress_record and subtopic.progress_record.questions_answered == subtopic.question_count %}
+                                                    <!-- Review Button-->
+                                                    <a href="{% url 'load_quiz_layout' subtopic.id topic.id %}?button_type=review"
+                                                        class="btn btn-sm btn-info">Review</a>
+                                                    
+                                                    <button type="button" class="btn btn-sm btn-danger retake"
+                                                        data-subtopic-id="{{ subtopic.id }}" data-topic-id="{{ topic.id }}"
+                                                        data-question-count="{{ subtopic.question_count }}">Retake</button>
+                                                {% endif %}
+                                            </div>
+                                        
+                                        </div>
+                                    {% endfor %}
+                            
+                                </div>
+                            {% endif %}    
+                        {% endfor %} 
+                    </div>                      
+                     
+                </div>
+
+                <!-- Confirmation Dialog-->
+                <dialog id="confirm-retake-quiz-dialog">
+                    <h5>Confirm Quiz Retake</h5>
+
+                    <p>You can retake this Quiz as many times as you like.
+                        If you continue, your last attempt will be deleted. Your initial
+                        score will still be kept.</p>
+
+                    <div class="dialog-buttons">
+                        <button type="button" id="cancel-button" class="btn btn-close"></button> 
+                        <!-- href will be set dynamically with Javascript --> 
+                        <a href="#" id="confirm-quiz-retake-button" class="btn btn-primary retake">Retake</a> 
+
+                    </div>
+                </dialog>
+            
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous">
+        </script>
+        <script src="{% static 'quizes/script.js' %}"></script>
+         
+    </body>
+</html>

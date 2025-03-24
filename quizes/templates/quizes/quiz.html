@@ -1,0 +1,62 @@
+<div class="quiz-wrapper">
+    <div id="quiz-msg" class="msg-div">
+        
+    </div>
+           
+    <div class="error-msg">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+        
+    <form class="quiz-form" id="quiz"  method="post">
+        {% csrf_token %}
+        <input type="hidden" id="quizsubtopic-id" name="quizsubtopic-id" value="">
+
+        <div id="pagination-container">
+                              
+            <button id="previous-button" class="btn btn-info" type="button">Previous</button>
+            <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
+            <button id="next-button" class="btn btn-info" type="button">Next</button>
+            
+        </div><br>
+
+        {% for question in page_obj %}
+            <input type="hidden" id="quizquestion-id" name="quizquestion-id" value="{{ question.id }}">
+            <div class="quiz-question">
+                <p>{{ question.text}}</p>
+
+                {% for choice in question.choices.all %}
+                    <div class="choice-container">
+                        {% if question.question_type.name == 'True/False' or question.question_type.name == 'Multiple Choice' %}
+                            <span id="span-{{ choice.id }}">
+                                <input type="radio" name="question-{{ question.id }}"
+                                        id="choice-{{ choice.id }}" value="{{ choice.id }}">
+                                <label for="choice-{{ choice.id }}">{{ choice.text }}</label>
+                            </span>
+                        {% elif question.question_type.name == 'Multiple Answer' %}
+                            <span id="span-{{ choice.id }}">
+                                <input type="checkbox" name="question-{{ question.id }}"
+                                    id="choice-{{ choice.id }}" value="{{ choice.id }}">
+                                <label for="choice-{{ choice.id }}">{{ choice.text }}</label>
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>        
+
+        {% endfor %}
+
+        <button class="btn btn-primary" id="submit-quiz-question" type="submit">
+            Submit
+        </button>
+        <button id="view-quiz-results" class="btn btn-primary" type="button">
+            Quiz Complete - View Results
+        </button>
+    </form>
+
+</div>

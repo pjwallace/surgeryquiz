@@ -1,0 +1,11 @@
+<div class="quiz-score-wrapper text-center">   
+
+    <h2>Score = {{ quiz_score }}% ({{ correct_answers }} correct of {{ question_count }})</h2>
+
+    <p>You can review the questions you missed by using the progress bar.</p>
+
+    <p>You can navigate back to your dashboard and retake this quiz again.</p>  
+    
+    <a class="btn btn-info" href="{% url 'dashboard' %}">Dashboard</a>
+
+</div>
