@@ -1,0 +1,23 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+    
+    <div class="form-container" id="rename-subtopic-container">
+        
+        <div id="rename-subtopic-msg" class="msg-div">
+            
+        </div>
+
+        <h2>Rename a Subtopic</h2><br>
+
+        <form id="rename-subtopic-form" data-fetch="true" method="post">
+            {% csrf_token %}
+            {{ rename_subtopic_form.as_p }}
+
+            <button class="btn btn-primary" id="rename-subtopic-btn" type="submit" 
+                    data-topic-id = "" data-subtopic-id = "">Rename Subtopic</button>
+        </form>
+    </div>
+
+   
+{% endblock %}

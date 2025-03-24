@@ -1,0 +1,79 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+
+    <div class="form-container" id="edit_explanation-container">
+
+        <div id="edit-explanation-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Edit or Delete a Question Explanation</h2><br>
+
+        <form id="edit-explanation-form" data-fetch="true" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="explanation-id" name="explanation-id" value="">
+            <div id="edit-explanation-container">
+                
+                <div class="form-group col-md-6">
+                    {{ edit_explanation_form.topic.label_tag }}
+                    {{ edit_explanation_form.topic }}
+                </div>
+                <div class="form-group col-md-8">
+                    {{ edit_explanation_form.subtopic.label_tag }}
+                    {{ edit_explanation_form.subtopic }}
+                </div>
+                                   
+                <div class="form-group">
+                    {{ edit_explanation_form.question.label_tag}}
+                    {{ edit_explanation_form.question}}
+                </div>
+
+                <div id="choices-container">
+                    
+                </div>
+
+                <div class="form-group" id="explanation-container"> 
+                    {{ edit_explanation_form.text.label_tag}}                  
+                    {{ edit_explanation_form.text }}
+                </div>
+            </div>
+
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary" id="edit-explanation-btn" type="submit" >
+                    Edit Explanation
+                </button>
+
+                <button class="btn btn-danger" id="delete-explanation-btn" type="button" disabled>
+                    Delete Explanation
+                </button>
+
+            </div>
+            
+        </form>
+
+        <!-- Confirmation Dialog-->
+        <dialog id="confirm-delete-explanation-dialog">
+            <h5>Confirm Explanation Deletion</h5>
+
+            <p>Are you sure you want to delete this explanation? <strong>This action cannot be undone!</strong></p>
+
+            <div class="dialog-buttons">
+                <button type="button" id="cancel-delete-explanation-button" class="btn btn-close"></button>
+                <button type="button" id="confirm-delete-explanation-button" class="btn btn-danger">Delete</button>
+            </div>
+         </dialog>
+
+    </div>
+
+{% endblock %}

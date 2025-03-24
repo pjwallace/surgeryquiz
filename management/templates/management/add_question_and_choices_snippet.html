@@ -1,0 +1,74 @@
+{% block body %}   
+    
+    <div class="form-container" id="add-question-and-choices-container">
+
+        <div id="add-question-and-choices-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Add Question and Answer Choices</h2><br>
+
+        <form id="add-question-and-choices-form" data-fetch="true" method="post">
+            {% csrf_token %}
+            <div id="add-question-container">
+                
+                    <div class="form-group col-md-6">
+                        {{ add_question_form.topic.label_tag }}
+                        {{ add_question_form.topic }}
+                    </div>
+                    <div class="form-group col-md-8">
+                        {{ add_question_form.subtopic.label_tag }}
+                        {{ add_question_form.subtopic }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ add_question_form.question_type.label_tag }}
+                        {{ add_question_form.question_type }}
+                    </div>
+                
+                <div class="form-group col-md-12">
+                    {{ add_question_form.text}}
+                    <div class="error-feedback" id="question-text-error"></div>
+                </div>
+            </div>
+
+            <div id="answer-choice-instructions" class="ms-3 text-muted">
+
+            </div>
+                        
+            <div id="add-choices-container">               
+                {% for add_choice_form in add_choice_forms %}
+                    <div class="choice-form" id="add-choice-{{ forloop.counter }}">
+                        <div class="add-choice-fields">
+                            {{ add_choice_form.text.label_tag }}
+                            {{ add_choice_form.text }}
+                            {{ add_choice_form.is_correct.label_tag }}
+                            {{ add_choice_form.is_correct }}
+                        </div>
+                    </div>                
+                {% endfor %}
+            </div>
+
+            <div class="btn-group" role="group">
+                <button class="btn btn-success" id="add-choice-btn" type="button" >
+                    Add Another Choice
+                </button>
+                
+                <button class="btn btn-primary" id="add-question-and-choices-btn" type="submit" >
+                    Submit Question and Answer Choices
+                </button>
+            </div>
+            
+        </form>
+    </div>
+   
+{% endblock %}

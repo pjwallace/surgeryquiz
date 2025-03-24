@@ -1,0 +1,41 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+
+    <div class="form-container" id="add-question-and-choices-container">
+
+        <div id="edit-question-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Select a Question to Edit</h2><br>
+
+        <form id="edit-question-form" data-fetch="true" method="post" action="#">
+            {% csrf_token %}
+            {{ edit_question_form.as_p }}
+
+
+
+            <button class="btn btn-primary" id="edit-question-btn" type="submit" >
+                Edit Question
+            </button>
+
+            <button class="btn btn-primary" id="edit-all-questions-btn" type="submit" >
+                Edit/Review All Questions
+            </button>
+        </form>
+
+
+    </div>
+
+{% endblock %}

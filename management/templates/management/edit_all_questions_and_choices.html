@@ -1,0 +1,97 @@
+{% extends "management/layout.html" %}
+
+{% block body %}   
+    
+    <div class="form-container" id="edit-all-questions-and-choices-container">
+
+        <div id="edit-all-questions-and-choices-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Edit Question and Answer Choices</h2><br>
+                
+            <form id="edit-all-questions-and-choices-form"  method="post" 
+                    action="{% url 'edit_all_questions_and_choices' %}">
+                {% csrf_token %}
+                <input type="hidden" id="question-id" name="question-id" value="{{ page_obj.object_list.0.id }}">
+                <input type="hidden" id="topic-id" name="topic-id" value="{{ topic_id }}">
+                <input type="hidden" id="subtopic-id" name="subtopic-id" value="{{ subtopic_id }}">
+                <input type="hidden" id="question-type-id" name="question-type-id" value="{{ question_type_id }}">
+                <input type="hidden" id="question-type-name" name="question-type" value="{{ question_type }}">
+                <input type="hidden" id="page" name="page" value="{{ page_number }}">
+                <div id="edit-question-container">
+                    <div class="edit-question-and-choice-fields">   
+                        
+                        <div class="form-group col-md-6">
+                            {{ edit_question_text_form.topic.label_tag }}
+                            {{ edit_question_text_form.topic }}
+                        </div>
+                        <div class="form-group col-md-8">
+                            {{ edit_question_text_form.subtopic.label_tag }}
+                            {{ edit_question_text_form.subtopic }}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{ edit_question_text_form.question_type.label_tag }}
+                            {{ edit_question_text_form.question_type }}
+                        </div>
+                                        
+                    </div>
+                    
+                    <div class="form-group col-md-12">
+                        {{ edit_question_text_form.text.label_tag }}
+                        {{ edit_question_text_form.text }}
+                    </div>
+                
+                </div>
+
+                <span class="answer-choices-label">Answer Choices:</span>
+                <div id="edit-choices-container">
+                    {% for edit_choice_form in edit_choice_forms %}
+                        <div class="choice-form" id="edit-choice-{{ forloop.counter }}">
+                            <input type="hidden" id="choice-id-{{ forloop.counter }}" 
+                                name="choice-id-{{ forloop.counter }}" value="{{ edit_choice_form.initial.id }}">
+                            <div class="edit-choice-fields">
+                                {{ edit_choice_form.text.label_tag }}
+                                {{ edit_choice_form.text }}
+                                {{ edit_choice_form.is_correct.label_tag }}
+                                {{ edit_choice_form.is_correct }}
+                            </div>
+                            
+                        </div>                
+                    {% endfor %}
+                </div>
+
+                <div class="btn-group" role="group">
+                    {% if question_type != 'True/False' %}
+                        <button class="btn btn-success" id="add-choice-btn-edit" type="button" >
+                            Add Another Choice
+                        </button>
+                    {% endif %}
+                    
+                    <button class="btn btn-primary" id="edit-all-questions-and-choices-btn" type="submit" >
+                        Modify This Question
+                    </button>
+                    
+                </div>
+
+
+            </form><br>
+        
+
+        <!-- Bootstrap Pagination (adapted from the bootstrap website)-->
+
+        {% include "management/pagination.html" %}
+
+    </div>
+
+{% endblock %}

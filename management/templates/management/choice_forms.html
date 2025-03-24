@@ -1,0 +1,11 @@
+{% for choice_form in choice_forms %}
+    <div class="choice-form">
+        
+        <div class="choice-fields">
+            {{ choice_form.text.label_tag }}
+            {{ choice_form.text }}
+            {{ choice_form.is_correct.label_tag }}
+            {{ choice_form.is_correct }}
+        </div>
+    </div>                
+{% endfor %}

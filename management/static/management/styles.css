@@ -1,0 +1,442 @@
+body, html {
+    overflow: hidden; /* Prevent scrolling on the body */
+    height: 100%; /* Ensure the body and html elements take up the full viewport height */
+}
+
+#brand{
+    margin-left: 15px;
+}
+
+#user-icon {
+    font-size: 1.5rem;
+    margin-right: 5px; 
+    cursor: pointer;
+}
+
+#logout-link{
+    margin-right: 15px;
+}
+
+.sidebar{
+    height: calc(100% - 55px);
+    width: 300px;
+    position: fixed;
+    z-index: 1;
+    top: 55px;
+    left: 0;
+    background-color: #111;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.sidebar a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;    
+    color: #C0C0C0;
+    display: block;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+}
+
+.topic{
+    font-size: 14px;
+}
+
+/* Gold color for hover, focus, and active links */
+.sidebar a:hover, .sidebar a:focus, .sidebar a.active {
+    color: #FFD700; 
+}
+
+/* font awesome up and down carets */
+.fa-caret-down{
+    float: right;
+    padding-right: 8px;
+    padding-top: 6px;
+}
+
+.fa-caret-up{
+    float: right;
+    padding-right: 8px;
+    padding-top: 6px;
+    display: none;
+}
+/* subtopic container */
+.subtopics{
+    display: none;
+    background-color: #3C3C3C;
+    
+}
+/* subtopic links */
+.subtopics .subtopic{
+    padding-left: 16px;
+    font-size: 12px;
+    color: #40E0D0;
+}
+
+.suptopic:hover, .suptopic:focus {
+    color: #FFD700; /* Gold color for hover and focus on subtopics */
+}
+
+.icon-with-badge {
+    position: relative;
+    
+    margin-right: 15px;  
+    float: right;
+}
+
+.icon-with-badge .fas {
+    font-size: 14px; 
+}
+
+.icon-with-badge .badge {
+    position: absolute;
+    top: -3px; 
+    right: -10px; 
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 10px; 
+}
+
+#management-container{
+    height: calc(100vh - 55px); 
+    margin-left: 300px;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #b0c4de;
+}
+
+#welcome-container{
+    border: 1px solid #ddd;
+    width: 90% ;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: aliceblue;
+}
+
+.form-container{    
+    width: 100%;
+    margin: 10px auto;    
+    padding: 20px;
+    background-color: aliceblue;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: auto;
+}
+
+.form-container h2{
+    text-align: center;
+}
+
+#add-topic-container, 
+#rename-topic-container,
+#delete-topic-container{
+    max-width: 500px;
+    margin-top: 40px;
+}
+
+#add-subtopic-container,
+#rename-subtopic-container,
+#delete-subtopic-container {
+    max-width: 600px;
+}
+
+#add-topic-btn,
+#rename-topic-btn,
+#delete-topic-btn,
+#add-subtopic-btn,
+#rename-subtopic-btn,
+#delete-subtopic-btn,
+#edit-question-btn,
+#get-edit-all-questions-btn
+ {
+    margin-top: 25px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#add-explanation-btn{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;    
+}
+
+#new-subtopic{
+    resize: none;
+}
+
+#add-question-and-choices-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+}
+
+#answer-choice-instructions {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0px;
+    margin-top: 0;
+}
+
+#new-question {
+    width: 100%;
+    resize: vertical;  
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.choice-form {
+    margin-bottom: 10px;
+    
+}
+
+.add-choice-fields, .edit-choice-fields, .choice-fields {
+    display: flex;
+    align-items: center; 
+    gap: 10px; /* Adds space between the text field and the checkbox */
+}
+
+.btn-group {
+    display: flex;
+    justify-content: center; 
+    gap: 50px; 
+    width: 100%;
+}
+
+.btn {
+    flex: 1; /* Ensures buttons take up equal space */
+}
+
+#edit-question-form, #edit-question-and-choices-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+}
+
+.answer-choices-label {
+    display: inline-block;
+    margin-left: 10px;  
+    font-weight: bold;  
+}
+
+.form-check-input{
+    width: 20px; 
+    height: 20px; 
+    transform: scale(1.4); 
+    margin: 5px; 
+}
+
+#add-explanation-form, #edit-explanation-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#topic-name-subtopic, #rename-topic, #topic-to-delete, #topic-to-choose, #subtopic-to-choose{
+    -webkit-appearance: menulist; /* Safari and Chrome */
+    -moz-appearance: menulist; /* Firefox */
+    appearance: menulist;
+}
+
+#topic-for-renamed-subtopic, #choose-subtopic-to-rename, #topic-for-question, #subtopic-for-question{
+    -webkit-appearance: menulist; /* Safari and Chrome */
+    -moz-appearance: menulist; /* Firefox */
+    appearance: menulist;
+}
+
+#question-type, #topic-for-edit-question, #subtopic-for-edit-question, #question-to-edit{
+    -webkit-appearance: menulist; /* Safari and Chrome */
+    -moz-appearance: menulist; /* Firefox */
+    appearance: menulist;
+}
+
+#topic-for-add-explanation, #subtopic-for-add-explanation, #question-for-add-explanation{
+    -webkit-appearance: menulist; /* Safari and Chrome */
+    -moz-appearance: menulist; /* Firefox */
+    appearance: menulist;    
+}
+
+#topic-for-edit-explanation, #subtopic-for-edit-explanation, #question-for-edit-explanation{
+    -webkit-appearance: menulist; /* Safari and Chrome */
+    -moz-appearance: menulist; /* Firefox */
+    appearance: menulist;    
+}
+
+/* grays out read only fields */
+.read-only{
+    background-color: #f0f0f0; /* Light gray background */
+    cursor: not-allowed;      
+}
+
+.readonly-field {
+    background-color: #e9ecef;  
+    color: #6c757d;            
+    cursor: not-allowed;
+}
+
+#topic-name, #subtopic-name, #question-name{
+    background-color: #f0f0f0; 
+    cursor: not-allowed;     
+}
+
+.is-error {
+    border-style: solid;
+    border-color: #dc3545;
+    border-width: 2px;
+}
+
+.error-feedback {
+    color: #dc3545;
+    display: block;
+}
+
+/* Dialog box */
+dialog {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+}
+
+dialog::backdrop {
+    background-color: rgba(0,0,0,0.5);
+}
+
+dialog h5 {
+    margin: 0 0 10px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+dialog p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-right: 30px;
+}
+
+.btn-close {
+    background-color: lightgray;
+    color: black;
+}
+
+.btn-danger {
+    background-color: red;
+    color: white;
+}
+
+#dashboard-link {
+    margin-left: 5rem;
+}
+
+.pagination .page-link {
+    font-size: 14px; 
+}
+
+.pagination .page-link::before {
+    font-size: inherit; 
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 768px){
+    .sidebar {
+        display: none;
+    }
+    #management-container{
+        margin-left: 0;
+        
+    }
+    #welcome-container{
+        width: 90%;
+        margin-top: 30px;
+    }
+    .form-container{
+        padding: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    #add-topic-container{
+        margin-top: 10px;
+        max-width: 550px;
+    }
+    #new-topic,
+    #rename-topic,
+    #new-topic-name,
+    #topic-to-delete,
+    #topic-name-subtopic{
+        height: 50px;
+        font-size: 1rem;
+    }
+    #add-topic-btn,
+    #rename-topic-btn,
+    #delete-topic-btn,
+    #add-subtopic-btn,
+    #rename-subtopic-btn,
+    #delete-subtopic-button,
+    #edit-question-btn,
+    #get-edit-all-questions-btn,
+    #add-explanation-btn,
+    #edit-explanation-btn,
+    #delete-explanation-btn{
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    #new-subtopic,
+    #new-subtopic-name{
+        font-size: 1rem;
+        height: 50px;
+    }
+    .btn-group{
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-left: 15px;
+    }
+    .pagination .page-link{
+        font-size: 18px;
+        padding: 10px 16px;
+    }
+    .pagination .page-item{
+        margin: 2px;
+    }
+    .pagination .page-link::before{
+        font-size: 20px;
+    }
+    
+}

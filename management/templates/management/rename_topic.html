@@ -1,0 +1,21 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+    
+    <div class="form-container" id="rename-topic-container">
+        <div id="rename-topic-msg" class="msg-div">
+            
+        </div>
+
+        <h2>Rename a Topic</h2><br>
+
+        <form id="rename-topic-form" data-fetch="true">
+            {% csrf_token %}
+            {{ rename_topic_form.as_p }}
+
+            <button class="btn btn-primary" id="rename-topic-btn" type="submit" >Rename Topic</button>
+        </form>
+    </div>
+
+   
+{% endblock %}

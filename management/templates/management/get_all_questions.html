@@ -1,0 +1,43 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+
+    <div class="form-container" id="get-all-questions-container">
+
+        <div id="get-all-questions-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Review/Edit all questions for topic/subtopic</h2><br>
+
+        <form id="get-all-questions-form"  method="get" action="{% url 'edit_all_questions_and_choices' %}">
+            {% csrf_token %}
+            <div class="form-group col-md-6">
+                {{ get_all_questions_form.topic.label_tag }}
+                {{ get_all_questions_form.topic }}
+            </div>
+            <div class="form-group col-md-8">
+                {{ get_all_questions_form.subtopic.label_tag }}
+                {{ get_all_questions_form.subtopic }}
+            </div>
+                        
+            <button class="btn btn-primary" id="get-edit-all-questions-btn" type="submit" >
+                Review/Edit All Questions
+            </button>
+           
+        </form>
+
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% block body %}   
+    
+    <div class="form-container" id="edit-question-and-choices-container">
+
+        <div id="edit-question-and-choices-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Edit Question and Answer Choices</h2><br>
+
+        <form id="edit-question-and-choices-form" data-fetch="true" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="question-id" name="question-id" value="{{ question_id }}">
+            <input type="hidden" id="question-name" name="question-name" value="{{ question_type }}">
+            <input type="hidden" id="subtopic-id" name="subtopic-id" value="">
+            <input type="hidden" id="question-type-id" name="question-type-id" value="">
+            <div id="edit-question-container">
+                                      
+                <div class="form-group col-md-6">
+                    {{ edit_question_text_form.topic.label_tag }}
+                    {{ edit_question_text_form.topic }}
+                </div>
+                <div class="form-group col-md-8">
+                    {{ edit_question_text_form.subtopic.label_tag }}
+                    {{ edit_question_text_form.subtopic }}
+                </div>
+                <div class="form-group col-md-4">
+                    {{ edit_question_text_form.question_type.label_tag }}
+                    {{ edit_question_text_form.question_type }}
+                </div>
+                                                       
+                <div class="form-group col-md-12">
+                    {{ edit_question_text_form.text.label_tag }}
+                    {{ edit_question_text_form.text }}
+                    <div class="error-feedback" id="question-text-error"></div>
+                </div>
+               
+            </div>
+
+            <div id="answer-choice-errors" class="ms-3 text-muted">
+
+            </div>
+
+            <div id="edit-choices-container">
+                {% for edit_choice_form in edit_choice_forms %}
+                    <div class="choice-form" id="edit-choice-{{ forloop.counter }}">
+                        <input type="hidden" id="choice-id-{{ forloop.counter }}" 
+                            name="choice-id-{{ forloop.counter }}" value="{{ edit_choice_form.instance.id }}">
+                        <div class="edit-choice-fields">
+                            {{ edit_choice_form.text.label_tag }}
+                            {{ edit_choice_form.text }}
+                            {{ edit_choice_form.is_correct.label_tag }}
+                            {{ edit_choice_form.is_correct }}
+                        </div>
+                    </div>                
+                {% endfor %}
+            </div>
+
+            <div class="btn-group" role="group">
+                {% if question_type != 'True/False' %}
+                    <button class="btn btn-success" id="add-choice-btn-edit" type="button" >
+                        Add Another Choice
+                    </button>
+                {% endif %}
+                
+                <button class="btn btn-primary" id="edit-question-and-choices-btn" type="submit">
+                        Modify Question and Choices
+                </button>
+
+                <button class="btn btn-danger" id="delete-question-btn" type="button"> 
+                        Delete Question
+                </button>
+            </div>
+        </form>
+
+        <!-- Confirmation Dialog-->
+         <dialog id="confirm-delete-question-dialog">
+            <h5>Confirm Question Deletion</h5>
+
+            <p>Are you sure you want to delete this question? All associated answer choices
+                and explanations will also be deleted. <strong>This action cannot be undone!</strong></p>
+
+            <div class="dialog-buttons">
+                <button type="button" id="cancel-button" class="btn btn-close"></button>
+                <button type="button" id="confirm-delete-question-button" class="btn btn-danger">Delete</button>
+            </div>
+         </dialog>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "management/layout.html" %}
+
+{% block body %}
+
+    <div class="form-container" id="edit-all-questions-container">
+
+        <div id="edit-all-questions-msg" class="msg-div">
+            
+        </div>
+       
+        <div class="error-msg">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h2>Review/Edit all questions for topic/subtopic</h2><br>
+
+        <form id="edit-question-form" data-fetch="true" method="post" action="#">
+            {% csrf_token %}
+            {{ edit_all_questions_form.as_p }}
+
+                        
+            <button class="btn btn-primary" id="edit-all-questions-btn" type="submit" >
+                Review/Edit All Questions
+            </button>
+           
+        </form>
+
+
+    </div>
+
+{% endblock %}
