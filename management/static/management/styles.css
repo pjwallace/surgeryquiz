@@ -22,12 +22,11 @@ body, html {
     width: 300px;
     position: fixed;
     z-index: 1;
-    top: 55px;
     left: 0;
     background-color: #111;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 20px;
 }
 
@@ -70,11 +69,12 @@ body, html {
 .subtopics{
     display: none;
     background-color: #3C3C3C;
+    margin-left: 25px;
     
 }
 /* subtopic links */
 .subtopics .subtopic{
-    padding-left: 16px;
+    padding-left: 5px;
     font-size: 12px;
     color: #40E0D0;
 }
