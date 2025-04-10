@@ -1,8 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.template import RequestContext
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError

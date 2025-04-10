@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function(){
     const buttonType = document.getElementById("button-type").value;
     let questionCount = document.getElementById("question-count").value;
     quizState.questionCount = questionCount;
-    console.log(buttonType);
     if (quizContainer && subtopicId && buttonType){
         if (buttonType === 'start' || buttonType === 'retake'){
             loadQuizQuestionsAndAnswers(subtopicId, pageNumber=1);
@@ -393,11 +392,10 @@ async function createProgressRecord(subtopicId){
 
         const data = await response.json();
 
-        if (data.success) {
-            console.log("Progress record successfully added");
-        } else {
+        if (!data.success) {
             console.error("Error adding progress record:", data.messages[0].message);
-        }
+        } 
+
     } catch (error) {
         console.error('Error in createProgressRecord:', error);
     }
@@ -446,9 +444,7 @@ async function saveAnswer(questionId, studentAnswers){
 
         const data = await response.json();
 
-        if (data.success){
-            console.log('StudentAnswer record updated or created');
-        }else{
+        if (!data.success){
             console.error("Error updating or creating StudentAnswer record:", data.messages[0].message);
         }
 
