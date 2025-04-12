@@ -33,6 +33,7 @@ body, html {
     overflow-y: auto;
     overflow-x: hidden;
     padding-top: 10px;
+    padding-bottom: 20px;
 }
 
 #progress-container a {
