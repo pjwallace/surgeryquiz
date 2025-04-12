@@ -34,20 +34,20 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     // load the first quiz question
-    const quizContainer = document.getElementById('quiz-container');
-    const subtopicId = document.getElementById("quiz-subtopic").value;
-    const buttonType = document.getElementById("button-type").value;
-    let questionCount = document.getElementById("question-count").value;
-    quizState.questionCount = questionCount;
-    if (quizContainer && subtopicId && buttonType){
-        if (buttonType === 'start' || buttonType === 'retake'){
-            loadQuizQuestionsAndAnswers(subtopicId, pageNumber=1);
-        } else if (buttonType === 'resume'){
-            resumeQuiz(subtopicId);
-        } else if (buttonType === 'review'){
-            reviewQuiz(subtopicId);
-        } 
-    }
+    //const quizContainer = document.getElementById('quiz-container');
+    //const subtopicId = document.getElementById("quiz-subtopic").value;
+    //const buttonType = document.getElementById("button-type").value;
+    //let questionCount = document.getElementById("question-count").value;
+    //quizState.questionCount = questionCount;
+    //if (quizContainer && subtopicId && buttonType){
+    //    if (buttonType === 'start' || buttonType === 'retake'){
+    //        loadQuizQuestionsAndAnswers(subtopicId, pageNumber=1);
+    //    } else if (buttonType === 'resume'){
+    //        resumeQuiz(subtopicId);
+    //    } else if (buttonType === 'review'){
+    //        reviewQuiz(subtopicId);
+    //    } 
+    //}
 
 })
 
