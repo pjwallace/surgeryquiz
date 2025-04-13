@@ -42,11 +42,18 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     subtopic_name = subtopic.name
 
     # get all the questions for the subtopic
-    questions = Question.objects.filter(subtopic_id=subtopic_id)
+    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
     questions_count = questions.count()
 
     # get the button type
     button_type = request.GET.get('button_type')
+
+    if button_type == 'start' or button_type == 'retake':
+        page_number = 1
+
+    # set up pagination
+    paginator = Paginator(questions, 1) # 1 question/page
+    page_obj = paginator.get_page(page_number)
 
     # if button type = retake, delete StudentAnswer records and update Progress record
     if button_type == 'retake':
@@ -58,7 +65,11 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'questions': questions,
         'question_count': questions_count,
         'subtopic_id': subtopic_id,
-        'button_type': button_type,        
+        'button_type': button_type, 
+        'page_obj': page_obj,
+        'page_number': page_number,
+        'paginator': paginator,
+        'questions': questions,       
     }
 
     return render(request, "quizes/quiz_layout.html", context)
