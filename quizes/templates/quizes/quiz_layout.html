@@ -95,10 +95,25 @@
             
                     <div id="pagination-container">
                                           
-                        <button id="previous-button" class="btn btn-info" type="button">Previous</button>
-                        <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
-                        <button id="next-button" class="btn btn-info" type="button">Next</button>
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}">
+                                <button id="previous-button" class="btn btn-info" type="button">Previous</button>
+                            </a>
+                        {% else %}
+                            <div class="pagination-spacer"></div>                        
+                        {% endif %}
                         
+                        <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number}}&button_type={{ button_type}}">
+                                <button id="next-button" class="btn btn-info" type="button">
+                                    Next</button>
+                            </a>
+                        {% else %}
+                            <div class="pagination-spacer"></div>                        
+                        {% endif %}
+                                       
                     </div><br>
             
                     {% for question in page_obj %}
@@ -126,13 +141,14 @@
                         </div>        
             
                     {% endfor %}
-            
-                    <button class="btn btn-primary" id="submit-quiz-question" type="submit">
-                        Submit
-                    </button>
-                    <button id="view-quiz-results" class="btn btn-primary" type="button">
-                        Quiz Complete - View Results
-                    </button>
+                    <div class="quiz-button-wrapper">
+                        <button class="btn btn-primary" id="submit-quiz-question" type="submit">
+                            Submit
+                        </button>
+                        <button id="view-quiz-results" class="btn btn-primary" type="button">
+                            Quiz Complete - View Results
+                        </button>
+                    </div>
                 </form>
             
             </div>            
@@ -142,6 +158,7 @@
 
         <div id="progress-container">
             {% for question in questions %}
+            <!--
                 <a href="javascript:void(0);" 
                     id="question-{{ question.id }}" class="questions" 
                     data-question-id="{{ question.id }}" data-subtopic-id="{{ question.subtopic_id}}"
@@ -150,7 +167,15 @@
                         <i class="fa fa-solid fa-check" id="check-{{ question.id }}"></i>
                         <i class="fa fa-times" id="times-{{ question.id }}"></i>  
                     Question {{ forloop.counter }}              
-                </a>                                      
+                </a> 
+            -->
+                <a href="{% url 'load_quiz_layout' question.subtopic_id question.subtopic.topic_id %}?page={{ forloop.counter }}"
+                    id="question-{{ question.id }}" class="questions">
+                        <i class="fa fa-circle" id="circle-{{ question.id }}"></i>
+                        <i class="fa fa-solid fa-check" id="check-{{ question.id }}"></i>
+                        <i class="fa fa-times" id="times-{{ question.id }}"></i>  
+                    Question {{ forloop.counter }}
+                </a>
             {% endfor %}
         </div>
        

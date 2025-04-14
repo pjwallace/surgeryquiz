@@ -172,20 +172,22 @@ body, html {
     width: 100%; 
 }
 
+#pagination-container a {
+    text-decoration: none;
+}
+
 #pagination-container h2 {
     text-align: center;
     font-size: 1.5em;
     margin: 0;
 }
 
-#previous-button {
-    justify-self: start; 
-    margin-left: 50px;
-}
-
-#next-button {
-    justify-self: end; 
-    margin-right: 50px;
+#pagination-container > a,
+.pagination-spacer {
+    display: flex;
+    justify-content: center;
+    min-width: 100px;
+    height: 38px; /* match button height */
 }
 
 .hidden {

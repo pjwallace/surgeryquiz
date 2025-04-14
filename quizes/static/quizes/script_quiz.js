@@ -17,21 +17,21 @@ window.addEventListener('beforeunload', ()=>{
     initializeQuizState();
 });
 // progress bar event listeners
-document.addEventListener('DOMContentLoaded', function(){
-    const progressContainer = document.getElementById('progress-container');
+//document.addEventListener('DOMContentLoaded', function(){
+//    const progressContainer = document.getElementById('progress-container');
    
-    if (progressContainer){
-        const questionLinks = document.querySelectorAll('#progress-container a');
+//    if (progressContainer){
+//        const questionLinks = document.querySelectorAll('#progress-container a');
 
-        questionLinks.forEach(link => {
-            link.addEventListener('click', function(e){
-                e.preventDefault();
-                const subtopicId = this.getAttribute('data-subtopic-id');
-                const pageNumber = this.getAttribute('data-page');
-                loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
-            })
-        })
-    }
+//        questionLinks.forEach(link => {
+//            link.addEventListener('click', function(e){
+//                e.preventDefault();
+//                const subtopicId = this.getAttribute('data-subtopic-id');
+//                const pageNumber = this.getAttribute('data-page');
+//                loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
+//            })
+//        })
+//    }
 
     // load the first quiz question
     //const quizContainer = document.getElementById('quiz-container');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function(){
     //    } 
     //}
 
-})
+//})
 
 function loadQuizQuestionsAndAnswers(subtopicId, pageNumber){
     const quizContainer = document.getElementById('quiz-container');

@@ -9,7 +9,7 @@ from management.models import Topic, Subtopic, Question, Choice, Explanation
 from quizes.models import Progress, StudentAnswer
 import json
 from django.template.loader import render_to_string
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import time
 import math
 from django.db import transaction
@@ -33,6 +33,7 @@ def dashboard(request):
     
 @login_required(login_url='login')
 def load_quiz_layout(request, subtopic_id, topic_id):
+    
     # get topic name for title
     topic = get_object_or_404(Topic, id=topic_id)
     topic_name = topic.name
@@ -45,64 +46,69 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
     questions_count = questions.count()
 
-    # get the button type
+    # get the button type and page number
     button_type = request.GET.get('button_type')
-
-    if button_type == 'start' or button_type == 'retake':
-        page_number = 1
-
-    # set up pagination
-    paginator = Paginator(questions, 1) # 1 question/page
-    page_obj = paginator.get_page(page_number)
+    page_number = request.GET.get('page', 1)
+    print(page_number)
 
     # if button type = retake, delete StudentAnswer records and update Progress record
     if button_type == 'retake':
         delete_student_answers(request, subtopic_id)
+        page_number = 1
+
+    # set up pagination
+    paginator = Paginator(questions, 1) # 1 question/page
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
     context = {
+        'topic_id': topic_id,
         'topic_name': topic_name,
+        'subtopic_id': subtopic_id,
         'subtopic_name': subtopic_name,
         'questions': questions,
-        'question_count': questions_count,
-        'subtopic_id': subtopic_id,
+        'question_count': questions_count,        
         'button_type': button_type, 
         'page_obj': page_obj,
         'page_number': page_number,
-        'paginator': paginator,
-        'questions': questions,       
+        'paginator': paginator,    
     }
 
     return render(request, "quizes/quiz_layout.html", context)
 
-@login_required(login_url='login')    
-def load_quiz_questions_and_answers(request, subtopic_id):
+#@login_required(login_url='login')    
+#def load_quiz_questions_and_answers(request, subtopic_id):
     #get all the questions for the subtopic
-    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
+#    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
 
     # set up pagination
-    paginator = Paginator(questions, 1) # 1 question/page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+#    paginator = Paginator(questions, 1) # 1 question/page
+#    page_number = request.GET.get('page')
+#    page_obj = paginator.get_page(page_number)
     
-    context = {
-        'page_obj': page_obj,
-        'page_number': page_number,
-        'paginator': paginator,
-        'questions': questions,
-    }
+#    context = {
+#        'page_obj': page_obj,
+#        'page_number': page_number,
+#        'paginator': paginator,
+#       'questions': questions,
+#    }
     # Use get_token(request) to get the CSRF token
-    csrf_token = get_token(request)  
-    context['csrf_token'] = csrf_token 
+#    csrf_token = get_token(request)  
+#    context['csrf_token'] = csrf_token 
 
-    quiz_html = render_to_string('quizes/quiz.html', context, request=request)
-    return JsonResponse({
-        "success": True, 
-        'quiz_html': quiz_html,
-        'has_next': page_obj.has_next(),
-        'has_previous': page_obj.has_previous(),
-        'page_number': page_obj.number,
-        'total_pages': paginator.num_pages
-        })
+#    quiz_html = render_to_string('quizes/quiz.html', context, request=request)
+#    return JsonResponse({
+#        "success": True, 
+#        'quiz_html': quiz_html,
+#        'has_next': page_obj.has_next(),
+#        'has_previous': page_obj.has_previous(),
+#        'page_number': page_obj.number,
+#        'total_pages': paginator.num_pages
+#        })
 
 @login_required(login_url='login')
 def process_quiz_question(request, subtopic_id):

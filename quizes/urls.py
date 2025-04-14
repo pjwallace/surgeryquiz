@@ -4,8 +4,8 @@ from . import views
 urlpatterns = [
      path("", views.dashboard, name="dashboard"),
      path("load_quiz_layout/<int:subtopic_id>/<int:topic_id>", views.load_quiz_layout, name="load_quiz_layout"),
-     path("load_quiz_questions_and_answers/<int:subtopic_id>", views.load_quiz_questions_and_answers, 
-          name="load_quiz_questions_and_answers"),
+     #path("load_quiz_questions_and_answers/<int:subtopic_id>", views.load_quiz_questions_and_answers, 
+     #     name="load_quiz_questions_and_answers"),
      path("process_quiz_question/<int:subtopic_id>", views.process_quiz_question, name="process_quiz_question"),
      path("create_progress_record/<int:subtopic_id>", views.create_progress_record, 
           name="create_progress_record"),
