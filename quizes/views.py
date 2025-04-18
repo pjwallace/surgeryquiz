@@ -49,12 +49,6 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     # get the button type and page number
     button_type = request.GET.get('button_type')
     page_number = request.GET.get('page', 1)
-    print(page_number)
-
-    # if button type = retake, delete StudentAnswer records and update Progress record
-    if button_type == 'retake':
-        delete_student_answers(request, subtopic_id)
-        page_number = 1
 
     # set up pagination
     paginator = Paginator(questions, 1) # 1 question/page
@@ -65,73 +59,82 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
+    # Unique key for this quiz/subtopic
+    session_key = f'quiz_state_{subtopic_id}'
+
+    #Initialize the quiz state
+    if session_key not in request.session:
+        # Only initialize once
+        request.session[session_key] = {
+            'page_number': int(page_number),
+            'total_pages': paginator.num_pages,
+            'question_count': questions.count(),
+            'questions_answered': 0,
+            'correct_answers': 0,
+            'incorrect_answers': 0,
+            'subtopic_id': subtopic_id,
+        }
+    quiz_state = request.session[session_key]
+
+    # retrieve the question to be displayed
+    question = page_obj.object_list[0]
+
     context = {
         'topic_id': topic_id,
         'topic_name': topic_name,
         'subtopic_id': subtopic_id,
         'subtopic_name': subtopic_name,
+        'question': question,
         'questions': questions,
+        'question_id': question.id,
         'question_count': questions_count,        
         'button_type': button_type, 
         'page_obj': page_obj,
         'page_number': page_number,
-        'paginator': paginator,    
+        'paginator': paginator,  
     }
 
     return render(request, "quizes/quiz_layout.html", context)
 
-#@login_required(login_url='login')    
-#def load_quiz_questions_and_answers(request, subtopic_id):
-    #get all the questions for the subtopic
-#    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
+@login_required(login_url='login')
+def resume_quiz(request, subtopic_id):
+    # get the previously answered questions
+    answered_question_ids = get_previous_questions_answered(request, subtopic_id)
 
-    # set up pagination
-#    paginator = Paginator(questions, 1) # 1 question/page
-#    page_number = request.GET.get('page')
-#    page_obj = paginator.get_page(page_number)
-    
-#    context = {
-#        'page_obj': page_obj,
-#        'page_number': page_number,
-#        'paginator': paginator,
-#       'questions': questions,
-#    }
-    # Use get_token(request) to get the CSRF token
-#    csrf_token = get_token(request)  
-#    context['csrf_token'] = csrf_token 
-
-#    quiz_html = render_to_string('quizes/quiz.html', context, request=request)
-#    return JsonResponse({
-#        "success": True, 
-#        'quiz_html': quiz_html,
-#        'has_next': page_obj.has_next(),
-#        'has_previous': page_obj.has_previous(),
-#        'page_number': page_obj.number,
-#        'total_pages': paginator.num_pages
-#        })
+    # retrieve the answer choice id for each question
+    for question_id in answered_question_ids:
+        student_answers = get_student_answers(request, subtopic_id, question_id)
+        get_previous_results(question_id, student_answers)
 
 @login_required(login_url='login')
-def process_quiz_question(request, subtopic_id):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        student_answers = data.get("selected_answers", [])
-        question_id = data.get("question_id", "")
-        previously_answered = data.get("previously_answered", "")
-        
+def process_quiz_question(request, subtopic_id, question_id):
+    if request.method == 'POST':  
+        learner = request.user
+        previously_answered = StudentAnswer.objects.filter(
+            learner=learner, 
+            subtopic_id=subtopic_id, 
+            question_id=question_id
+        ).exists() 
+
+        question = get_object_or_404(Question, id=question_id)
+
+        student_answers = request.POST.getlist("answer")
+
+        context = build_quiz_context(request, subtopic_id, question_id) 
+
         # only validate the answer if it hasn't been previously answered
         if not previously_answered:       
             # must select at least one correct answer
             if not student_answers:
-                return JsonResponse({"success": False, 
-                    "messages": [{"message": "You didn't select an answer.", "tags": "danger"}]}, status=400)
+                messages.error(request, "You didn't select an answer.")
+                return render(request, "quizes/quiz_layout.html", context)
             
             # if multiple answer question, must select at least 2 answers
-        question = get_object_or_404(Question, id=question_id)
+        
         if not previously_answered:
             if question.question_type.name == 'Multiple Answer' and len(student_answers)< 2:
-                return JsonResponse({"success": False, 
-                    "messages": [{"message": "At least 2 answers are required for this question type.", "tags": "danger"}]}, 
-                        status=400)
+                messages.error(request, "You must select at least two answers for this type of question.")
+                return render(request, "quizes/quiz_layout.html", context)
         
         # grade the quiz question                   
         results_dict = {}
@@ -383,25 +386,18 @@ def save_answer(request, question_id):
         }, status=500)       
     
 @login_required(login_url='login')
-def get_student_answer(request, subtopic_id, question_id):
+def get_student_answers(request, subtopic_id, question_id):
     learner = request.user
-    
-    student_answers = StudentAnswer.objects.filter(
-    learner=learner,
-    subtopic_id=subtopic_id,
-    question_id=question_id
-    ).prefetch_related('selected_choices')
-    
-    if not student_answers.exists():
-        return JsonResponse({"success": False })
-    
-   # Collect the ID of each selected choice
-    student_answers_list = [
-        choice_id for answer in student_answers 
-        for choice_id in answer.selected_choices.values_list('id', flat=True)
-    ]
-        
-    return JsonResponse({"success": True, 'student_answers_list': student_answers_list})
+
+    # Query all selected choice IDs 
+    selected_choice_ids = StudentAnswer.objects.filter(
+        learner=learner,
+        subtopic_id=subtopic_id,
+        question_id=question_id
+    ).values_list('selected_choices__id', flat=True)
+
+    return list(selected_choice_ids)
+
         
 @login_required(login_url='login')
 def load_quiz_question_explanation(request, question_id):
@@ -423,7 +419,7 @@ def load_quiz_question_explanation(request, question_id):
     return JsonResponse({"success": True, "quiz_explanation_html": quiz_explanation_html})
 
 @login_required(login_url='login')
-def get_previous_student_answers(request, subtopic_id):
+def get_previous_questions_answered(request, subtopic_id):
     learner = request.user
     
     student_answers = StudentAnswer.objects.filter(
@@ -432,16 +428,17 @@ def get_previous_student_answers(request, subtopic_id):
     )
     
     if not student_answers.exists():
-        return JsonResponse({"success": False })
+        messages.error(request, "StudentAnswer record does not exist for this user.")
+        return []
     else:
         answer_question_ids = [answer.question_id for answer in student_answers] 
         # convert to a set to remove duplicate ids that will exist with multiple answer questions
         answer_question_ids = set(answer_question_ids)
 
-        # reconvert to a list for JSON 
+        # reconvert to a list 
         answer_question_ids = list(answer_question_ids)
             
-        return JsonResponse({"success": True, "answer_question_ids": answer_question_ids})
+        return answer_question_ids
 
 @login_required(login_url='login')
 def process_completed_quiz(request, subtopic_id):
@@ -515,3 +512,27 @@ def delete_student_answers(request, subtopic_id):
 
         except Exception as e:           
             messages.error(f"An error occurred: {str(e)}")
+
+def build_quiz_context(request, subtopic_id, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    questions = Question.objects.filter(subtopic_id=subtopic_id)
+    topic = question.subtopic.topic
+    button_type = request.GET.get('button_type')
+    page_number = request.POST.get('page', 1)
+    paginator = Paginator(questions, 1)
+    page_obj = paginator.get_page(page_number)
+
+    return {
+        'topic_id': topic.id,
+        'topic_name': topic.name,
+        'subtopic_id': subtopic_id,
+        'subtopic_name': question.subtopic.name,
+        'question': question,
+        'questions': questions,
+        'question_id': question.id,
+        'question_count': questions.count(),
+        'button_type': button_type,
+        'page_obj': page_obj,
+        'page_number': page_number,
+        'paginator': paginator,
+    }

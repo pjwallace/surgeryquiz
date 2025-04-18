@@ -1,21 +1,21 @@
 // Javascript for the quiz page
 
 // Define quizState globally with initial default values
-const quizState = {
-    hasNext: false,
-    hasPrevious: false,
-    pageNumber: 1,
-    totalPages: 0,
-    correctAnswers: 0,
-    incorrectAnswers: 0,
-    questionCount: 0,
-    questionsAnswered: 0,
-};
+//const quizState = {
+//  hasNext: false,
+//  hasPrevious: false,
+//    pageNumber: 1,
+//    totalPages: 0,
+//  correctAnswers: 0,
+//    incorrectAnswers: 0,
+//    questionCount: 0,
+//    questionsAnswered: 0,
+//};
 
 // reset quizState when leaving the quiz page
-window.addEventListener('beforeunload', ()=>{
-    initializeQuizState();
-});
+//window.addEventListener('beforeunload', ()=>{
+//    initializeQuizState();
+//});
 // progress bar event listeners
 //document.addEventListener('DOMContentLoaded', function(){
 //    const progressContainer = document.getElementById('progress-container');
@@ -146,14 +146,14 @@ function loadQuizQuestionsAndAnswers(subtopicId, pageNumber){
                         studentAnswers.forEach(choiceId=>{
                             const choiceInput = document.querySelector(`input[value="${choiceId}"]`);
                             if (choiceInput){
-                                choiceInput.checked = 'true';
+                                choiceInput.checked = true;
                             }
                         });
 
                         // disable all input boxes on the form
                         const choiceInputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
                         choiceInputs.forEach(input => {
-                            input.disabled = 'true';
+                            input.disabled = true;
                         });
 
                         let previouslyAnswered = true;
@@ -465,18 +465,7 @@ async function loadQuizQuestionExplanation(questionId, subtopicId) {
             //console.log('Explanation fetched:', data.quiz_explanation_html);
 
             explanationContainer.innerHTML = data.quiz_explanation_html;
-            //explanationContainer.offsetHeight; // Force reflow
-            // Delay the insertion of explanation content
-
-            //setTimeout(() => {
-            //    explanationContainer.innerHTML = data.quiz_explanation_html;
-                // Optional: Force reflow if needed
-            //    explanationContainer.offsetHeight; 
-            //}, 50); // Adjust the delay as needed (e.g., 50ms)
-           
-            // add event listeners to the previous and next buttons
-            // if there isn't a previous quiz question, hide the previous button;
-            // else display the button and add an event listener              
+                      
             const previousButtonBottom = document.getElementById('previous-button-bottom');
             if (previousButtonBottom){
                 if (quizState.hasPrevious){
