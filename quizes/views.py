@@ -117,6 +117,7 @@ def process_quiz_question(request, subtopic_id, question_id):
         ).exists() 
 
         question = get_object_or_404(Question, id=question_id)
+        question_type = question.question_type.name
 
         student_answers = request.POST.getlist("answer")
 
@@ -156,8 +157,8 @@ def process_quiz_question(request, subtopic_id, question_id):
                 student_selected_choices.add(choice_id)
                
             except Choice.DoesNotExist:
-                return JsonResponse({"success": False, 
-                    "messages": [{"message": "Choice not found.", "tags": "danger"}]}, status=400)
+                messages.error(request, "Answer choice not found.")
+                return render(request, "quizes/quiz_layout.html", context)
 
         # For multiple answer questions, there are 2 edge cases to consider:
         # 1) The student didn't choose all the correct answers
@@ -187,22 +188,36 @@ def process_quiz_question(request, subtopic_id, question_id):
                     "selected_by_student": True,
                     "is_extra_incorrect": True
                 }
-        
-        # check if the progress record exists or must be created
-        try:
+
+        if not previously_answered:
+            correct_answer = grade_quiz(results_dict, question_type)
+            update_quiz_state(request, subtopic_id, correct_answer)
+
+            # check if the progress record exists or must be created            
             progress = Progress.objects.get(learner=request.user, subtopic_id=subtopic_id)
-            progress_data = {
-                'questions_answered': progress.questions_answered,
-                'progress_exists': 'yes'
-            }
-        except Progress.DoesNotExist:
-            progress_data = {
-                'progress_exists': 'no'
-            }
-               
-        return JsonResponse({"success": True, "student_answers": student_answers, "results_dict": results_dict, 
-                'question_id': question_id, "question_type": question.question_type.name,
-                'progress_data': progress_data})    
+            if progress:
+                update_progress_record(request, subtopic_id, question_id)
+            else:
+                create_progress_record(request, subtopic_id, question_id)
+
+            # save the student answers in the StudentAnswer model
+            save_answers(request, subtopic_id, question_id, student_answers)
+
+        return render(request, "quizes/quiz_layout.html", context)     
+
+def grade_quiz(results_dict, question_type):
+    if question_type in ['True/False', 'Multiple Choice']:
+        for result in results_dict.values():
+            if result['is_correct'] and result['selected_by_student']:
+                return True 
+        return False
+    
+    elif question_type == 'Multiple Answer':
+        for result in results_dict.values():
+            if (not result['is_correct'] and result['selected_by_student']) or \
+               (result['is_correct'] and not result['selected_by_student']):
+                return False  
+        return True
 
 @login_required(login_url='login') 
 @csrf_exempt 
@@ -272,118 +287,72 @@ def get_previous_results(request, subtopic_id):
 
             
 @login_required(login_url='login')
-def create_progress_record(request, subtopic_id):
-    if request.method == 'POST':
-        learner = request.user
-
-        for _ in range(RETRIES):
-
-            # if database is locked from a previous operation, retry 3 times
-            try:
-                progress = Progress(learner=learner, subtopic_id=subtopic_id, questions_answered=1)
-                progress.save()
-
-                return JsonResponse({"success": True})
-            
-            except IntegrityError:
-                return JsonResponse({"success": False,  
-                    "messages": [{"message": "An error occurred while creating this record.", "tags": "danger"}]},
-                        status=500)
-            
-            except Exception as e:
-                if "database is locked" in str(e).lower():
-                    time.sleep(0.3) 
-                else:
-                    return JsonResponse({"success": False, "messages": [{"message": f"An unexpected error occurred: {str(e)}", "tags": "danger"}]},
-                        status=500)  
-                
-        return JsonResponse({
-            "success": False,
-            "messages": [{"message": "Database is locked after multiple attempts.", "tags": "danger"}]
-        }, status=500)           
+def create_progress_record(request, subtopic_id, question_id):  
+    # Create a Progress record if one does not already exist
+      
+    learner = request.user
     
+    try:
+        progress = Progress(learner=learner, 
+                        subtopic_id=subtopic_id, 
+                        questions_answered=1,
+                        initial_score = 0,
+                        latest_score = 0
+                    )
+        progress.save()
+    
+    except Exception as e:
+        context = build_quiz_context(request, subtopic_id, question_id)
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return render(request, "quizes/quiz_layout.html", context)
+               
 @login_required(login_url='login')
-def update_progress_record(request, subtopic_id):
-    if request.method == 'PUT':
-        learner = request.user
+def update_progress_record(request, subtopic_id, question_id):    
+    learner = request.user
 
-         # create a Progress instance
-        try:
-            progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
-            questions_answered = progress.questions_answered
-        except Progress.DoesNotExist:
-            return JsonResponse({"success": False, 
-                "messages": [{"message": "Progress record does not exist.", "tags": "danger"}]}, status=400)
+    # create a Progress instance
+    try:
+        progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
+        progress.questions_answered += 1 
+        progress.save()
+    except Progress.DoesNotExist:
+        context = build_quiz_context(request, subtopic_id, question_id)
+        messages.error(request, "Progress record does not exist.")
+        return render(request, "quizes/quiz_layout.html", context)
+    except Exception as e:
+        context = build_quiz_context(request, subtopic_id, question_id)
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return render(request, "quizes/quiz_layout.html", context)
         
-        for _ in range(RETRIES):        
-            # update number of questions answered
-            try:
-                progress.questions_answered = questions_answered + 1           
-                progress.save()
-                return JsonResponse({"success": True})
-        
-            except Exception as e:
-                if "database is locked" in str(e).lower():
-                    time.sleep(0.3) 
-                else:
-                    return JsonResponse({"success": False, "messages": [{"message": f"An unexpected error occurred: {str(e)}", "tags": "danger"}]},
-                        status=500) 
-                
-        return JsonResponse({
-            "success": False,
-            "messages": [{"message": "Database is locked after multiple attempts.", "tags": "danger"}]
-        }, status=500)          
-
 @login_required(login_url='login')
-def save_answer(request, question_id):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        student_answers = data.get("student_answers", [])
-        question = get_object_or_404(Question, id=question_id)
+def save_answers(request, subtopic_id, question_id, student_answers):    
+    question = get_object_or_404(Question, id=question_id)
+      
+    try:
+        # all updates must succeed. Roll back to initial state if any update fails
+        with transaction.atomic():
 
-        # if database is locked from a previous operation, retry 3 times
-        for _ in range(RETRIES):
-            try:
-                # all updates must succeed. Roll back to initial state if any update fails
-                with transaction.atomic():
-        
-                    # iterate over the student_answer list and create a StudentAnswer record for each answer
-                    # each answer is a choice id
-                    # question type 'Multiple Answer' will have at least 2 answers
-                    for student_answer in student_answers:
-                        selected_choices = Choice.objects.get(pk=student_answer)
+            # iterate over the student_answer list and create a StudentAnswer record for each answer
+            # each answer is a choice id
+            # question type 'Multiple Answer' will have at least 2 answers
+            for student_answer in student_answers:
+                selected_choices = Choice.objects.get(pk=student_answer)
 
-                        # save the student's answers                        
-                        student_answer_obj = StudentAnswer.objects.create(
-                            learner = request.user,
-                            question = question,
-                            subtopic = question.subtopic,
-                            is_correct=selected_choices.is_correct                    
-                        )
+                # save the student's answers                        
+                student_answer_obj = StudentAnswer.objects.create(
+                    learner = request.user,
+                    question = question,
+                    subtopic = question.subtopic,
+                    is_correct = selected_choices.is_correct                    
+                )
 
-                        # add the selected_choices many-to-many field using the set() method
-                        student_answer_obj.selected_choices.set([selected_choices]) 
-                
-                # database operations were successful
-                return JsonResponse({"success": True})
+                # add the selected_choices many-to-many field using the set() method
+                student_answer_obj.selected_choices.set([selected_choices]) 
 
-            except Exception as e:
-                error_message = f"An error occurred: {str(e)}"
-                if "database is locked" in str(e).lower():
-                    # If the database is locked, wait before retrying
-                    time.sleep(0.5)  
-                else:
-                    # For other exceptions, return immediately
-                    return JsonResponse({
-                        "success": False,
-                        "messages": [{"message": error_message, "tags": "danger"}]
-                    }, status=500)
-
-        # If retry fails, return an error
-        return JsonResponse({
-            "success": False,
-            "messages": [{"message": "Database error occurred.", "tags": "danger"}]
-        }, status=500)       
+    except Exception as e:
+        context = build_quiz_context(request, subtopic_id, question_id)
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return render(request, "quizes/quiz_layout.html", context)         
     
 @login_required(login_url='login')
 def get_student_answers(request, subtopic_id, question_id):
@@ -536,3 +505,19 @@ def build_quiz_context(request, subtopic_id, question_id):
         'page_number': page_number,
         'paginator': paginator,
     }
+
+def update_quiz_state(request, subtopic_id, correct_answer):
+    session_key = f'quiz_state_{subtopic_id}'
+    quiz_state = request.session.get(session_key, {})
+
+    if quiz_state:
+        quiz_state['questions_answered'] += 1
+
+        if correct_answer:
+            quiz_state['correct_answers'] += 1
+        else:
+            quiz_state['incorrect_answers'] += 1
+
+    request.session[session_key] = quiz_state
+    request.session.modified = True
+    

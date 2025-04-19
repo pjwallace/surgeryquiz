@@ -51,178 +51,178 @@
 
 //})
 
-function loadQuizQuestionsAndAnswers(subtopicId, pageNumber){
-    const quizContainer = document.getElementById('quiz-container');
-    const quizScoreContainer = document.getElementById('quiz-score-container');
-    const explanationContainer = document.getElementById('explanation-container');
+//function loadQuizQuestionsAndAnswers(subtopicId, pageNumber){
+//    const quizContainer = document.getElementById('quiz-container');
+//    const quizScoreContainer = document.getElementById('quiz-score-container');
+//    const explanationContainer = document.getElementById('explanation-container');
    
-    if (quizContainer){
-        const route = `/quizes/home/load_quiz_questions_and_answers/${subtopicId}?page=${pageNumber}`;   
-        fetch(route)
-        .then(response => response.json())
-        .then(data =>{
-            if (data.success){
-                quizState.hasNext = data.has_next;
-                quizState.hasPrevious = data.has_previous;
-                quizState.pageNumber  = data.page_number;
-                quizState.totalPages = data.total_pages;
-
-                if (quizScoreContainer){
-                    quizScoreContainer.innerHTML = '';    
-                }
-
-                if (explanationContainer){
-                    explanationContainer.innerHTML = '';    
-                }
-
-                quizContainer.innerHTML = '';
-                quizContainer.innerHTML = data.quiz_html;
-                
-                document.getElementById('quizsubtopic-id').value = subtopicId;
-
+//    if (quizContainer){
+//        const route = `/quizes/home/load_quiz_questions_and_answers/${subtopicId}?page=${pageNumber}`;   
+//        fetch(route)
+//        .then(response => response.json())
+//        .then(data =>{
+//            if (data.success){
+//                quizState.hasNext = data.has_next;
+//                quizState.hasPrevious = data.has_previous;
+//                quizState.pageNumber  = data.page_number;
+//
+//                quizState.totalPages = data.total_pages;
+//
+//                if (quizScoreContainer){
+//                    quizScoreContainer.innerHTML = '';    
+//                }
+//
+//                if (explanationContainer){
+//                    explanationContainer.innerHTML = '';    
+//                }
+//
+//                quizContainer.innerHTML = '';
+//                quizContainer.innerHTML = data.quiz_html;
+//                
+//                document.getElementById('quizsubtopic-id').value = subtopicId;
                
                 // if there isn't a previous quiz question, hide the previous button;
                 // else display the button and add an event listener              
-                const previousButton = document.getElementById('previous-button');
-                if (previousButton){
-                    if (quizState.hasPrevious){
-                        previousButton.classList.remove('hidden');
+//                const previousButton = document.getElementById('previous-button');
+//               if (previousButton){
+//                    if (quizState.hasPrevious){
+//                       previousButton.classList.remove('hidden');
 
                         // remove the old event listener to prevent multiple event listeners for the same button
-                        previousButton.removeEventListener('click', previousPageHandler);
+//                        previousButton.removeEventListener('click', previousPageHandler);
 
                         // define previousPageHandler
-                        function previousPageHandler(){
-                            previousPage(subtopicId, quizState.pageNumber);    
-                        }
+//                        function previousPageHandler(){
+//                          previousPage(subtopicId, quizState.pageNumber);    
+//                        }
                         // add the event listener
-                        previousButton.addEventListener('click', previousPageHandler);
-                    }else{
-                        previousButton.classList.add('hidden');
-                    }
-                }   
+//                      previousButton.addEventListener('click', previousPageHandler);
+//                  }else{
+//                        previousButton.classList.add('hidden');
+//                    }
+//                }   
                 
                 // if there isn't a next quiz question, hide the next button;
                 // else display the button and add an event listener
-                const nextButton = document.getElementById('next-button');
-                if (nextButton){
-                    if (quizState.hasNext){
-                        nextButton.classList.remove('hidden');
+//                const nextButton = document.getElementById('next-button');
+//                if (nextButton){
+//                    if (quizState.hasNext){
+//                        nextButton.classList.remove('hidden');
 
                         // remove the old event listener to prevent multiple event listeners for the same button
-                        nextButton.removeEventListener('click', nextPageHandler);
+//                        nextButton.removeEventListener('click', nextPageHandler);
 
                         // define nextPageHandler
-                        function nextPageHandler(){
-                            nextPage(subtopicId, quizState.pageNumber, quizState.totalPages);    
-                        }
+//                        function nextPageHandler(){
+//                            nextPage(subtopicId, quizState.pageNumber, quizState.totalPages);    
+//                        }
                          // add the event handler to the next button
-                        nextButton.addEventListener('click', nextPageHandler);
-                    }else{
-                        nextButton.classList.add('hidden');                        
-                    }
-                }
+//                        nextButton.addEventListener('click', nextPageHandler);
+//                   }else{
+//                        nextButton.classList.add('hidden');                        
+//                    }
+//                }
 
                 // check if this question has been previously answered (StudentAnswer record exists).                
-                (async () => {
-                    const questionId = document.getElementById('quizquestion-id').value;
-                    const studentAnswers = await getStudentAnswer(subtopicId, questionId);
+//                (async () => {
+//                    const questionId = document.getElementById('quizquestion-id').value;
+//                    const studentAnswers = await getStudentAnswer(subtopicId, questionId);
                     
-                    if (studentAnswers && studentAnswers.length > 0){
+//                    if (studentAnswers && studentAnswers.length > 0){
                         // disable the submit button
-                        const submitButton = document.getElementById('submit-quiz-question');
-                        const viewQuizResults = document.getElementById('view-quiz-results');
+//                       const submitButton = document.getElementById('submit-quiz-question');
+//                        const viewQuizResults = document.getElementById('view-quiz-results');
                         
-                        if (submitButton){
-                            submitButton.style.display = 'none';
-                        }
+//                        if (submitButton){
+//                            submitButton.style.display = 'none';
+//                        }
 
                         // disable the view quiz results button                        
-                        if (viewQuizResults){
-                            viewQuizResults.style.display = 'none';
-                        } 
+//                        if (viewQuizResults){
+//                            viewQuizResults.style.display = 'none';
+//                        } 
 
                         // mark the choices selected by the student
-                        studentAnswers.forEach(choiceId=>{
-                            const choiceInput = document.querySelector(`input[value="${choiceId}"]`);
-                            if (choiceInput){
-                                choiceInput.checked = true;
-                            }
-                        });
+//                        studentAnswers.forEach(choiceId=>{
+//                            const choiceInput = document.querySelector(`input[value="${choiceId}"]`);
+//                            if (choiceInput){
+//                                choiceInput.checked = true;
+//                            }
+//                        });
 
-                        // disable all input boxes on the form
-                        const choiceInputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-                        choiceInputs.forEach(input => {
-                            input.disabled = true;
-                        });
+//                        // disable all input boxes on the form
+//                        const choiceInputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+//                        choiceInputs.forEach(input => {
+//                            input.disabled = true;
+//                        });
 
-                        let previouslyAnswered = true;
-                        processQuizQuestion(studentAnswers, previouslyAnswered);
-                    }else{
+//                       let previouslyAnswered = true;
+//                        processQuizQuestion(studentAnswers, previouslyAnswered);
+//                    }else{
                         // question has not been previously answered
                         // make sure the submit button is displayed
-                        const submitButton = document.getElementById('submit-quiz-question');
-                        if (submitButton){
-                            submitButton.style.display = 'block';
-                        }
+//                        const submitButton = document.getElementById('submit-quiz-question');
+//                        if (submitButton){
+//                            submitButton.style.display = 'block';
+//                        }
     
                         // remove any old event listeners for the form submission event
-                        quizContainer.removeEventListener('submit', formSubmitHandler);               
+//                        quizContainer.removeEventListener('submit', formSubmitHandler);               
     
                         // add the form submit event handler
-                        quizContainer.addEventListener('submit', formSubmitHandler);
-                    }
-                })();
+//                        quizContainer.addEventListener('submit', formSubmitHandler);
+//                    }
+//                })();
 
-            }else{
-                console.error("Failed to load quiz html");
-            }
+//            }else{
+//                console.error("Failed to load quiz html");
+//            }
 
-        })
-        .catch(error => console.error('Error loading quiz:', error));
-    }
-}
+//        })
+//        .catch(error => console.error('Error loading quiz:', error));
+//    }
+//}
 
-function previousPage(subtopicId, pageNumber ){
-    if (pageNumber > 1){
-        pageNumber  --;
-        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
-    }
-}
+//function previousPage(subtopicId, pageNumber ){
+//    if (pageNumber > 1){
+//        pageNumber  --;
+//        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
+//    }
+//}
 
-function nextPage(subtopicId, pageNumber, totalPages){
-    if (pageNumber < totalPages){
-        pageNumber ++;
-        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
-    }    
-}
+//function nextPage(subtopicId, pageNumber, totalPages){
+//    if (pageNumber < totalPages){
+//        pageNumber ++;
+//        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
+//    }    
+//}
 
 // add event listener to the form
-function formSubmitHandler(e){
-    e.preventDefault();
-    if (e.target && e.target.id === 'quiz'){
-        let previouslyAnswered = false;
-        const studentAnswers = [];
-        processQuizQuestion(studentAnswers, previouslyAnswered);
-    }
-};
+//function formSubmitHandler(e){
+//    e.preventDefault();
+//    if (e.target && e.target.id === 'quiz'){
+//        let previouslyAnswered = false;
+//        const studentAnswers = [];
+//        processQuizQuestion(studentAnswers, previouslyAnswered);
+//    }
+//};
 
-async function getStudentAnswer(subtopicId, questionId){
-    const route = `/quizes/home/get_student_answer/${subtopicId}/${questionId}`;   
-    try {
-        const response = await fetch(route);
-        const data = await response.json();
+//async function getStudentAnswer(subtopicId, questionId){
+//    const route = `/quizes/home/get_student_answer/${subtopicId}/${questionId}`;   
+//    try {
+//        const response = await fetch(route);
+//        const data = await response.json();
         
-        if (data.success) {
-            return data.student_answers_list;
-        } else {
-            return data.student_answers_list; 
-        }
-    } catch (error) {
-        console.error("Error fetching student answers:", error);
-        return null;
-    }
-}
+//        if (data.success) {
+//            return data.student_answers_list;
+//        } else {
+//            return data.student_answers_list; 
+//        }
+//    } catch (error) {
+//        console.error("Error fetching student answers:", error);
+//        return null;
+//    }
+//}
 
 async function processQuizQuestion(selectedAnswers, previouslyAnswered){
     const subtopicId = document.getElementById('quizsubtopic-id').value;
