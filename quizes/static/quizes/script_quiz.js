@@ -347,6 +347,21 @@ async function processQuizQuestion(selectedAnswers, previouslyAnswered){
     }
 }
 
+function updateProgressBar(questionId, correctAnswer){
+    // called from django template
+    document.getElementById(`circle-${questionId}`).style.display = 'none';
+    if (correctAnswer === 'true'){
+        document.getElementById(`times-${questionId}`).style.display = 'none';
+        document.getElementById(`check-${questionId}`).style.display = 'block';    
+    }else {
+        document.getElementById(`times-${questionId}`).style.display = 'block';
+        document.getElementById(`check-${questionId}`).style.display = 'none';            
+    }
+
+    //document.getElementById(`check-${questionId}`).style.display = incorrectAnswer ? 'none' : 'block';
+    //document.getElementById(`times-${questionId}`).style.display = incorrectAnswer ? 'block' : 'none';
+}
+
 function highlightAnswers(results_dict, questionType){    
     // loop over each key, value pair in results_dict
     for (const [choice_id, result] of Object.entries(results_dict)){
@@ -522,7 +537,7 @@ async function resumeQuiz(subtopicId){
     for (const questionId of answerQuestionIds){
         let studentAnswers = await getStudentAnswer(subtopicId, questionId);
 
-        await updateProgressBar(subtopicId, questionId, studentAnswers);
+        //await updateProgressBar(subtopicId, questionId, studentAnswers);
         
     }
 
@@ -538,7 +553,7 @@ async function reviewQuiz(subtopicId){
     for (const questionId of answerQuestionIds){
         let studentAnswers = await getStudentAnswer(subtopicId, questionId);
 
-        await updateProgressBar(subtopicId, questionId, studentAnswers);
+        //await updateProgressBar(subtopicId, questionId, studentAnswers);
         
     }
 
@@ -562,62 +577,62 @@ async function getPreviousStudentAnswers(subtopicId){
     }
 }
 
-async function updateProgressBar(subtopicId, questionId, studentAnswers){
-    const route = `/quizes/home/get_previous_results/${subtopicId}`;
+//async function updateProgressBar(subtopicId, questionId, studentAnswers){
+//    const route = `/quizes/home/get_previous_results/${subtopicId}`;
 
-    try{
-        const response = await fetch(route, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+//    try{
+//        const response = await fetch(route, {
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
                 
-            },
-            body: JSON.stringify({
-                student_answers: studentAnswers,
-                question_id: questionId,
-            }),
-        });
+//            },
+//            body: JSON.stringify({
+//                student_answers: studentAnswers,
+//                question_id: questionId,
+//            }),
+//        });
         
-        const data = await response.json();
-        if (data.success){
+//        const data = await response.json();
+//        if (data.success){
             // Handle correct/incorrect answers
             
-            let incorrectAnswer = false;
-            if (data.question_type === 'True/False' || data.question_type === 'Multiple Choice'){
-                incorrectAnswer = Object.values(data.results_dict).some(result => !result.is_correct);
-            }else if (data.question_type === 'Multiple Answer'){
+//            let incorrectAnswer = false;
+//            if (data.question_type === 'True/False' || data.question_type === 'Multiple Choice'){
+//                incorrectAnswer = Object.values(data.results_dict).some(result => !result.is_correct);
+//            }else if (data.question_type === 'Multiple Answer'){
                 // For multiple-answer questions, check if:
                 // 1. Any selected answer is incorrect, or
                 // 2. Any correct answer was not selected by the student
-                incorrectAnswer = Object.values(data.results_dict).some(result => 
-                    (!result.is_correct && result.selected_by_student) ||  // Incorrect answer was selected
-                    (result.is_correct && !result.selected_by_student)     // Correct answer was not selected
-                );
-            }
+//                incorrectAnswer = Object.values(data.results_dict).some(result => 
+//                    (!result.is_correct && result.selected_by_student) ||  // Incorrect answer was selected
+//                    (result.is_correct && !result.selected_by_student)     // Correct answer was not selected
+//                );
+//            }
 
             // update the progress bar
-            document.getElementById(`circle-${questionId}`).style.display = 'none';
-            document.getElementById(`check-${questionId}`).style.display = incorrectAnswer ? 'none' : 'block';
-            document.getElementById(`times-${questionId}`).style.display = incorrectAnswer ? 'block' : 'none';
+//            document.getElementById(`circle-${questionId}`).style.display = 'none';
+//            document.getElementById(`check-${questionId}`).style.display = incorrectAnswer ? 'none' : 'block';
+//            document.getElementById(`times-${questionId}`).style.display = incorrectAnswer ? 'block' : 'none';
 
             // update the number of correct and incorrect answers
-            quizState.questionsAnswered ++;
-            if (incorrectAnswer) {
-                quizState.incorrectAnswers++;
-            } else {
-                quizState.correctAnswers++;
-            }
+//            quizState.questionsAnswered ++;
+//            if (incorrectAnswer) {
+//                quizState.incorrectAnswers++;
+//            } else {
+//                quizState.correctAnswers++;
+//            }
 
-        }else{
-            clearMessages();
-            document.getElementById('quiz-msg').innerHTML = `<div class="alert alert-${data.messages[0].tags}" role="alert">${data.messages[0].message}</div>`;
-        }
+//        }else{
+//            clearMessages();
+//            document.getElementById('quiz-msg').innerHTML = `<div class="alert alert-${data.messages[0].tags}" role="alert">${data.messages[0].message}</div>`;
+//        }
 
-    }catch(error){        
-        console.error('Error retrieving previous quiz answers:', error);        
-    }
+//    }catch(error){        
+//        console.error('Error retrieving previous quiz answers:', error);        
+//    }
 
-}
+//}
 
 function getFirstUnansweredQuestion(){
     const progressContainer = document.getElementById('progress-container');

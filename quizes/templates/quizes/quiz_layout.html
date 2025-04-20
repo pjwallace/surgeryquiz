@@ -81,36 +81,38 @@
                         {% endfor %}
                     {% endif %}
                 </div>
+
+                <div id="pagination-container">
+                                          
+                    {% if page_obj.has_previous %}
+                        <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
+                            id="previous-button" class="btn btn-info">Previous
+                        </a>
+                    {% else %}
+                        <div class="pagination-spacer"></div>                        
+                    {% endif %}
+                    
+                    <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
+
+                    {% if page_obj.has_next %}
+                        <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
+                            id="next-button" class="btn btn-info">Next                        
+                        </a>
+                        
+                    {% else %}
+                        <div class="pagination-spacer"></div>                        
+                    {% endif %}                                      
+                </div><br>
                     
                 <form class="quiz-form" id="quiz"  
                     action="{% url 'process_quiz_question' subtopic_id question_id %}" 
                     method="post">
                     {% csrf_token %}
-            
-                    <div id="pagination-container">
-                                          
-                        {% if page_obj.has_previous %}
-                            <a href="?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}">
-                                <button id="previous-button" class="btn btn-info" type="button">Previous</button>
-                            </a>
-                        {% else %}
-                            <div class="pagination-spacer"></div>                        
-                        {% endif %}
-                        
-                        <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
-
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number}}&button_type={{ button_type}}">
-                                <button id="next-button" class="btn btn-info" type="button">
-                                    Next</button>
-                            </a>
-                        {% else %}
-                            <div class="pagination-spacer"></div>                        
-                        {% endif %}
-                                       
-                    </div><br>
-                               
+                                
+                    <input type="hidden" id="quizsubtopic-id" name="quizsubtopic-id" value="{{ subtopic_id }}">         
                     <input type="hidden" id="quizquestion-id" name="quizquestion-id" value="{{ question.id }}">
+                    <input type="hidden" id="quiz-page-number" name="page" value="{{ page_obj.number }}">
+
                     <div class="quiz-question">
                         <p>{{ question.text}}</p>
         
@@ -137,11 +139,13 @@
                         <button class="btn btn-primary" id="submit-quiz-question" type="submit">
                             Submit
                         </button>
-                        <button id="view-quiz-results" class="btn btn-primary" type="button">
-                            Quiz Complete - View Results
-                        </button>
+                        
                     </div>
                 </form>
+
+                <button id="view-quiz-results" class="btn btn-primary" type="button">
+                    Quiz Complete - View Results
+                </button>
             
             </div>            
 
@@ -150,17 +154,7 @@
 
         <div id="progress-container">
             {% for question in questions %}
-            <!--
-                <a href="javascript:void(0);" 
-                    id="question-{{ question.id }}" class="questions" 
-                    data-question-id="{{ question.id }}" data-subtopic-id="{{ question.subtopic_id}}"
-                    data-page="{{ forloop.counter}}">
-                        <i class="fa fa-circle" id="circle-{{ question.id }}"></i>
-                        <i class="fa fa-solid fa-check" id="check-{{ question.id }}"></i>
-                        <i class="fa fa-times" id="times-{{ question.id }}"></i>  
-                    Question {{ forloop.counter }}              
-                </a> 
-            -->
+            
                 <a href="{% url 'load_quiz_layout' question.subtopic_id question.subtopic.topic_id %}?page={{ forloop.counter }}"
                     id="question-{{ question.id }}" class="questions">
                         <i class="fa fa-circle" id="circle-{{ question.id }}"></i>
@@ -180,10 +174,31 @@
             crossorigin="anonymous"></script>
 
         <script>
-            const quizMode = '{{ button_type }}';
-                    
+            const quizMode = '{{ button_type }}';                               
         </script>
-        <script src="{% static 'quizes/script_quiz.js' %}"></script>        
+
+        <script src="{% static 'quizes/script_quiz.js' %}"></script>   
+        
+        {% if correct_answer is not None %}
+            <script>
+                const questionId = '{{ question.id }}';
+                const correctAnswer = '{{ correct_answer|yesno:"true,false" }}'; 
+                updateProgressBar(questionId, correctAnswer);
+            </script>
+        {% endif %}
+
+        <script>
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    console.log("Clicked link:", this.href);
+                });
+            });
+            
+            document.querySelector('form').addEventListener('submit', function (e) {
+                console.log("Form submitted to:", this.action);
+            });
+        </script>
+            
 
     </body>
 

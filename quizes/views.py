@@ -188,16 +188,21 @@ def process_quiz_question(request, subtopic_id, question_id):
                     "selected_by_student": True,
                     "is_extra_incorrect": True
                 }
+        
+        correct_answer = grade_quiz(results_dict, question_type)
+        context['correct_answer'] = correct_answer
 
+        # if the question hasn't been previously answered, uodate quiz state, create or update
+        # progress record, and save te student answers
         if not previously_answered:
-            correct_answer = grade_quiz(results_dict, question_type)
+            
             update_quiz_state(request, subtopic_id, correct_answer)
 
-            # check if the progress record exists or must be created            
-            progress = Progress.objects.get(learner=request.user, subtopic_id=subtopic_id)
-            if progress:
-                update_progress_record(request, subtopic_id, question_id)
-            else:
+            # check if the progress record exists or must be created 
+            try:           
+                Progress.objects.get(learner=request.user, subtopic_id=subtopic_id)
+                update_progress_record(request, subtopic_id, question_id)                
+            except Progress.DoesNotExist:
                 create_progress_record(request, subtopic_id, question_id)
 
             # save the student answers in the StudentAnswer model
@@ -484,7 +489,7 @@ def delete_student_answers(request, subtopic_id):
 
 def build_quiz_context(request, subtopic_id, question_id):
     question = get_object_or_404(Question, id=question_id)
-    questions = Question.objects.filter(subtopic_id=subtopic_id)
+    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
     topic = question.subtopic.topic
     button_type = request.GET.get('button_type')
     page_number = request.POST.get('page', 1)
