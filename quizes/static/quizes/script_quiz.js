@@ -1,16 +1,6 @@
 // Javascript for the quiz page
 
-// Define quizState globally with initial default values
-//const quizState = {
-//  hasNext: false,
-//  hasPrevious: false,
-//    pageNumber: 1,
-//    totalPages: 0,
-//  correctAnswers: 0,
-//    incorrectAnswers: 0,
-//    questionCount: 0,
-//    questionsAnswered: 0,
-//};
+
 
 // reset quizState when leaving the quiz page
 //window.addEventListener('beforeunload', ()=>{
@@ -183,30 +173,6 @@
 //    }
 //}
 
-//function previousPage(subtopicId, pageNumber ){
-//    if (pageNumber > 1){
-//        pageNumber  --;
-//        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
-//    }
-//}
-
-//function nextPage(subtopicId, pageNumber, totalPages){
-//    if (pageNumber < totalPages){
-//        pageNumber ++;
-//        loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
-//    }    
-//}
-
-// add event listener to the form
-//function formSubmitHandler(e){
-//    e.preventDefault();
-//    if (e.target && e.target.id === 'quiz'){
-//        let previouslyAnswered = false;
-//        const studentAnswers = [];
-//        processQuizQuestion(studentAnswers, previouslyAnswered);
-//    }
-//};
-
 //async function getStudentAnswer(subtopicId, questionId){
 //    const route = `/quizes/home/get_student_answer/${subtopicId}/${questionId}`;   
 //    try {
@@ -362,9 +328,9 @@ function updateProgressBar(questionId, correctAnswer){
     //document.getElementById(`times-${questionId}`).style.display = incorrectAnswer ? 'block' : 'none';
 }
 
-function highlightAnswers(results_dict, questionType){    
-    // loop over each key, value pair in results_dict
-    for (const [choice_id, result] of Object.entries(results_dict)){
+function highlightAnswers(resultsDict, questionType){    
+    // loop over each key, value pair in resultsDict
+    for (const [choice_id, result] of Object.entries(resultsDict)){
         const choiceElement = document.getElementById(`span-${choice_id}`);
         
         if (!choiceElement){
@@ -390,83 +356,117 @@ function highlightAnswers(results_dict, questionType){
 
 }
 
-async function createProgressRecord(subtopicId){
-    const route = `/quizes/home/create_progress_record/${subtopicId}`;
+function formatAnsweredQuestion(studentAnswers){                    
+    if (studentAnswers && studentAnswers.length > 0){
+        // disable the submit button
+        const submitButton = document.getElementById('submit-quiz-question');
+        const viewQuizResults = document.getElementById('view-quiz-results');
+        
+        if (submitButton){
+            submitButton.style.display = 'none';
+        }
+
+        // disable the view quiz results button                        
+        if (viewQuizResults){
+            viewQuizResults.style.display = 'none';
+        } 
+        
+        // mark the choices selected by the student
+        studentAnswers.forEach(choiceId=>{
+            const choiceInput = document.querySelector(`input[type="checkbox"][value="${choiceId}"], input[type="radio"][value="${choiceId}"]`);
+            console.log(choiceInput);
+            console.log(choiceId);
+            if (choiceInput){
+                choiceInput.checked = true;
+            }
+        });
+
+        // disable all input boxes on the form
+        const choiceInputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+        choiceInputs.forEach(input => {
+            input.disabled = true;
+        });
+
+    }
+}
+
+//async function createProgressRecord(subtopicId){
+//    const route = `/quizes/home/create_progress_record/${subtopicId}`;
 
     // Retrieve the django CSRF token from the form
-    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+//    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    try {
-        const response = await fetch(route, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            }
-        });
+//    try {
+//        const response = await fetch(route, {
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
+//                'X-CSRFToken': csrftoken,
+//            }
+//        });
 
-        const data = await response.json();
+//        const data = await response.json();
 
-        if (!data.success) {
-            console.error("Error adding progress record:", data.messages[0].message);
-        } 
+//        if (!data.success) {
+//            console.error("Error adding progress record:", data.messages[0].message);
+//        } 
 
-    } catch (error) {
-        console.error('Error in createProgressRecord:', error);
-    }
-}
+//    } catch (error) {
+//        console.error('Error in createProgressRecord:', error);
+//    }
+//}
 
-async function updateProgressRecord(subtopicId) {
-    const route = `/quizes/home/update_progress_record/${subtopicId}`;
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+//async function updateProgressRecord(subtopicId) {
+//    const route = `/quizes/home/update_progress_record/${subtopicId}`;
+//    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    try {
-        const response = await fetch(route, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            }
-        });
+//    try {
+//        const response = await fetch(route, {
+//            method: 'PUT',
+//            headers: {
+//                'Content-Type': 'application/json',
+//                'X-CSRFToken': csrftoken,
+//            }
+//        });
 
-        const data = await response.json();
+//        const data = await response.json();
 
-        if (data.success) {
-            console.log("Progress record successfully updated");
-        } else {
-            console.error("Error updating progress record:", data.messages[0].message);
-        }
-    } catch (error) {
-        console.error('Error in updateProgressRecord:', error);
-    }
-}
+//        if (data.success) {
+//            console.log("Progress record successfully updated");
+//        } else {
+//            console.error("Error updating progress record:", data.messages[0].message);
+//        }
+//    } catch (error) {
+//        console.error('Error in updateProgressRecord:', error);
+//    }
+//}
 
-async function saveAnswer(questionId, studentAnswers){
-    const route = `/quizes/home/save_answer/${questionId}`
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+//async function saveAnswer(questionId, studentAnswers){
+//    const route = `/quizes/home/save_answer/${questionId}`
+//    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
-    try {
-        const response = await fetch(route, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            },
-            body: JSON.stringify({
-                student_answers: studentAnswers
-            }),
-        });
+//    try {
+//        const response = await fetch(route, {
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
+//                'X-CSRFToken': csrftoken,
+//            },
+//            body: JSON.stringify({
+//                student_answers: studentAnswers
+//            }),
+//        });
 
-        const data = await response.json();
+//        const data = await response.json();
 
-        if (!data.success){
-            console.error("Error updating or creating StudentAnswer record:", data.messages[0].message);
-        }
+//        if (!data.success){
+//            console.error("Error updating or creating StudentAnswer record:", data.messages[0].message);
+//        }
 
-    } catch (error){
-        console.error('Error saving student answer:', error);
-    }
-}
+//    } catch (error){
+//        console.error('Error saving student answer:', error);
+//    }
+//}
 
 async function loadQuizQuestionExplanation(questionId, subtopicId) {
     const explanationContainer = document.getElementById('explanation-container');
@@ -711,16 +711,16 @@ function displayQuizScore(quizScoreHTML){
 
 }
 
-function initializeQuizState() {
-    quizState.hasNext = false;
-    quizState.hasPrevious = false;
-    quizState.pageNumber = 1;
-    quizState.totalPages = 0;
-    quizState.correctAnswers = 0;
-    quizState.incorrectAnswers = 0;
-    quizState.questionCount = 0;
-    quizState.questionsAnswered = 0;
-}
+//function initializeQuizState() {
+//quizState.hasNext = false;
+//    quizState.hasPrevious = false;
+//    quizState.pageNumber = 1;
+//    quizState.totalPages = 0;
+//    quizState.correctAnswers = 0;
+//    quizState.incorrectAnswers = 0;
+//    quizState.questionCount = 0;
+//    quizState.questionsAnswered = 0;
+//}
 
 function clearMessages(){
     const messageContainer = document.querySelector('.error-msg');

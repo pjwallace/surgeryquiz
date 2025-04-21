@@ -190,10 +190,16 @@ def process_quiz_question(request, subtopic_id, question_id):
                 }
         
         correct_answer = grade_quiz(results_dict, question_type)
-        context['correct_answer'] = correct_answer
+        context['correct_answer'] = correct_answer # needed for javascript updateProgressBar()
+        # needed for Javascript highlightAnswers()
+        context['question_type'] = question_type
+        context['results_dict'] = json.dumps(results_dict) 
+        # needed for answered question formatting 
+        context['student_answers'] = json.dumps(student_answers)
+        print(context['student_answers'])
 
         # if the question hasn't been previously answered, uodate quiz state, create or update
-        # progress record, and save te student answers
+        # progress record, and save the student answers
         if not previously_answered:
             
             update_quiz_state(request, subtopic_id, correct_answer)

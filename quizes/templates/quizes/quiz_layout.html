@@ -83,25 +83,23 @@
                 </div>
 
                 <div id="pagination-container">
-                                          
-                    {% if page_obj.has_previous %}
-                        <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
-                            id="previous-button" class="btn btn-info">Previous
-                        </a>
-                    {% else %}
-                        <div class="pagination-spacer"></div>                        
-                    {% endif %}
+                    <div>                      
+                        {% if page_obj.has_previous %}
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
+                                id="previous-button" class="btn btn-info">Previous
+                            </a>                       
+                        {% endif %}
+                    </div>
                     
                     <h2>Question {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</h2>
 
-                    {% if page_obj.has_next %}
-                        <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
-                            id="next-button" class="btn btn-info">Next                        
-                        </a>
-                        
-                    {% else %}
-                        <div class="pagination-spacer"></div>                        
-                    {% endif %}                                      
+                    <div>
+                        {% if page_obj.has_next %}
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
+                                id="next-button" class="btn btn-info">Next                        
+                            </a>                       
+                        {% endif %} 
+                    </div>                                     
                 </div><br>
                     
                 <form class="quiz-form" id="quiz"  
@@ -187,18 +185,20 @@
             </script>
         {% endif %}
 
-        <script>
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function (e) {
-                    console.log("Clicked link:", this.href);
-                });
-            });
-            
-            document.querySelector('form').addEventListener('submit', function (e) {
-                console.log("Form submitted to:", this.action);
-            });
-        </script>
-            
+        {% if results_dict %}
+            <script>
+                const questionType = '{{ question_type }}';
+                const resultsDict = JSON.parse('{{ results_dict|escapejs }}');
+                highlightAnswers(resultsDict, questionType);
+            </script>
+        {% endif %}
+
+        {% if student_answers %}
+            <script>
+                const studentAnswers = JSON.parse('{{ student_answers|escapejs }}');
+                formatAnsweredQuestion(studentAnswers);
+            </script>
+        {% endif %}   
 
     </body>
 
