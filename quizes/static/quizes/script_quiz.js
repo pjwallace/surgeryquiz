@@ -313,20 +313,24 @@ async function processQuizQuestion(selectedAnswers, previouslyAnswered){
     }
 }
 
-function updateProgressBar(questionId, correctAnswer){
-    // called from django template
-    document.getElementById(`circle-${questionId}`).style.display = 'none';
-    if (correctAnswer === 'true'){
-        document.getElementById(`times-${questionId}`).style.display = 'none';
-        document.getElementById(`check-${questionId}`).style.display = 'block';    
-    }else {
-        document.getElementById(`times-${questionId}`).style.display = 'block';
-        document.getElementById(`check-${questionId}`).style.display = 'none';            
-    }
+function updateProgressBar(previousAnswers) {
+    for (const [questionId, wasCorrect] of Object.entries(previousAnswers)) {
+        const circle = document.getElementById(`circle-${questionId}`);
+        const check = document.getElementById(`check-${questionId}`);
+        const times = document.getElementById(`times-${questionId}`);
 
-    //document.getElementById(`check-${questionId}`).style.display = incorrectAnswer ? 'none' : 'block';
-    //document.getElementById(`times-${questionId}`).style.display = incorrectAnswer ? 'block' : 'none';
+        if (circle) circle.style.display = 'none';
+
+        if (wasCorrect === true || wasCorrect === 'true') {
+            if (check) check.style.display = 'block';
+            if (times) times.style.display = 'none';
+        } else {
+            if (check) check.style.display = 'none';
+            if (times) times.style.display = 'block';
+        }
+    }
 }
+
 
 function highlightAnswers(resultsDict, questionType){    
     // loop over each key, value pair in resultsDict
@@ -374,8 +378,7 @@ function formatAnsweredQuestion(studentAnswers){
         // mark the choices selected by the student
         studentAnswers.forEach(choiceId=>{
             const choiceInput = document.querySelector(`input[type="checkbox"][value="${choiceId}"], input[type="radio"][value="${choiceId}"]`);
-            console.log(choiceInput);
-            console.log(choiceId);
+            
             if (choiceInput){
                 choiceInput.checked = true;
             }
@@ -389,84 +392,6 @@ function formatAnsweredQuestion(studentAnswers){
 
     }
 }
-
-//async function createProgressRecord(subtopicId){
-//    const route = `/quizes/home/create_progress_record/${subtopicId}`;
-
-    // Retrieve the django CSRF token from the form
-//    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-//    try {
-//        const response = await fetch(route, {
-//            method: 'POST',
-//            headers: {
-//                'Content-Type': 'application/json',
-//                'X-CSRFToken': csrftoken,
-//            }
-//        });
-
-//        const data = await response.json();
-
-//        if (!data.success) {
-//            console.error("Error adding progress record:", data.messages[0].message);
-//        } 
-
-//    } catch (error) {
-//        console.error('Error in createProgressRecord:', error);
-//    }
-//}
-
-//async function updateProgressRecord(subtopicId) {
-//    const route = `/quizes/home/update_progress_record/${subtopicId}`;
-//    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-//    try {
-//        const response = await fetch(route, {
-//            method: 'PUT',
-//            headers: {
-//                'Content-Type': 'application/json',
-//                'X-CSRFToken': csrftoken,
-//            }
-//        });
-
-//        const data = await response.json();
-
-//        if (data.success) {
-//            console.log("Progress record successfully updated");
-//        } else {
-//            console.error("Error updating progress record:", data.messages[0].message);
-//        }
-//    } catch (error) {
-//        console.error('Error in updateProgressRecord:', error);
-//    }
-//}
-
-//async function saveAnswer(questionId, studentAnswers){
-//    const route = `/quizes/home/save_answer/${questionId}`
-//    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-//    try {
-//        const response = await fetch(route, {
-//            method: 'POST',
-//            headers: {
-//                'Content-Type': 'application/json',
-//                'X-CSRFToken': csrftoken,
-//            },
-//            body: JSON.stringify({
-//                student_answers: studentAnswers
-//            }),
-//        });
-
-//        const data = await response.json();
-
-//        if (!data.success){
-//            console.error("Error updating or creating StudentAnswer record:", data.messages[0].message);
-//        }
-
-//    } catch (error){
-//        console.error('Error saving student answer:', error);
-//    }
-//}
 
 async function loadQuizQuestionExplanation(questionId, subtopicId) {
     const explanationContainer = document.getElementById('explanation-container');

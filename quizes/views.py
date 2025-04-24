@@ -43,7 +43,7 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     subtopic_name = subtopic.name
 
     # get all the questions for the subtopic
-    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
+    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('display_order', 'id')
     questions_count = questions.count()
 
     # get the button type and page number
@@ -74,10 +74,23 @@ def load_quiz_layout(request, subtopic_id, topic_id):
             'incorrect_answers': 0,
             'subtopic_id': subtopic_id,
         }
-    quiz_state = request.session[session_key]
-
+    
     # retrieve the question to be displayed
     question = page_obj.object_list[0]
+    question_type = question.question_type.name
+
+    # retrieve any previously answered questions
+    answered_question_ids = get_previous_questions_answered(request, subtopic_id)
+    if answered_question_ids:
+        previous_answers = {}
+        for question_id in answered_question_ids:
+            student_answers = get_student_answers(request, subtopic_id, question_id)
+            results_dict = create_results_dictionary(question_id, student_answers)
+            correct_answer = grade_quiz(results_dict, question_type)
+            previous_answers[question_id] = correct_answer
+       
+        context['previous_answers'] = json.dumps(previous_answers)
+
 
     context = {
         'topic_id': topic_id,
@@ -87,7 +100,7 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'question': question,
         'questions': questions,
         'question_id': question.id,
-        'question_count': questions_count,        
+        'question_count': questions_count,       
         'button_type': button_type, 
         'page_obj': page_obj,
         'page_number': page_number,
@@ -137,57 +150,58 @@ def process_quiz_question(request, subtopic_id, question_id):
                 messages.error(request, "You must select at least two answers for this type of question.")
                 return render(request, "quizes/quiz_layout.html", context)
         
-        # grade the quiz question                   
-        results_dict = {}
+        # grade the quiz question 
+        results_dict = create_results_dictionary(question_id, student_answers)                  
+        #results_dict = {}
         # get all the correct answers from the Choice model in list form. Using sets allows for easy comparisions
-        correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
+        #correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
 
         # create a set of student choices
-        student_selected_choices = set()
+        #student_selected_choices = set()
 
-        for answer in student_answers:
-            choice_id = int(answer)
+        #for answer in student_answers:
+        #    choice_id = int(answer)
             
-            try:
-                choice = get_object_or_404(Choice, id=choice_id)
-                results_dict[choice_id] = {
-                    "is_correct": choice.is_correct,
-                    "selected_by_student": True
-                }
-                student_selected_choices.add(choice_id)
+        #    try:
+        #        choice = get_object_or_404(Choice, id=choice_id)
+        #        results_dict[choice_id] = {
+        #            "is_correct": choice.is_correct,
+        #            "selected_by_student": True
+        #        }
+        #        student_selected_choices.add(choice_id)
                
-            except Choice.DoesNotExist:
-                messages.error(request, "Answer choice not found.")
-                return render(request, "quizes/quiz_layout.html", context)
+        #    except Choice.DoesNotExist:
+        #        messages.error(request, "Answer choice not found.")
+        #        return render(request, "quizes/quiz_layout.html", context)
 
         # For multiple answer questions, there are 2 edge cases to consider:
         # 1) The student didn't choose all the correct answers
         # 2) The student chose all the correct answers but also chose an additional incorrect answer
 
         # student missed 1 or more correct answers
-        missed_correct_answers = correct_choices - student_selected_choices
+        #missed_correct_answers = correct_choices - student_selected_choices
         # student chose all the correct answers + 1 or more incorrect answers
-        extra_incorrect_answers = student_selected_choices - correct_choices
+        #extra_incorrect_answers = student_selected_choices - correct_choices
 
         # add missed correct answers to the results_dict. The student didn't choose all the correct answers
-        for choice_id in missed_correct_answers:
-            results_dict[choice_id] = {
-                "is_correct": True,
-                "selected_by_student": False
-            }
+        #for choice_id in missed_correct_answers:
+        #    results_dict[choice_id] = {
+        #        "is_correct": True,
+        #        "selected_by_student": False
+        #    }
 
         # add any extra incorrect answer to results_dict
-        for choice_id in extra_incorrect_answers:
+        #for choice_id in extra_incorrect_answers:
             # update existing entry to flag it as an extra incorrect answer
-            if choice_id in results_dict:
-                results_dict[choice_id]["is_extra_incorrect"] = True
-            else:
+        #    if choice_id in results_dict:
+        #        results_dict[choice_id]["is_extra_incorrect"] = True
+        #    else:
                 # add to results_dict if not already present
-                results_dict[choice_id] = {
-                    "is_correct": False,
-                    "selected_by_student": True,
-                    "is_extra_incorrect": True
-                }
+        #        results_dict[choice_id] = {
+        #            "is_correct": False,
+        #            "selected_by_student": True,
+        #            "is_extra_incorrect": True
+        #        }
         
         correct_answer = grade_quiz(results_dict, question_type)
         context['correct_answer'] = correct_answer # needed for javascript updateProgressBar()
@@ -196,8 +210,7 @@ def process_quiz_question(request, subtopic_id, question_id):
         context['results_dict'] = json.dumps(results_dict) 
         # needed for answered question formatting 
         context['student_answers'] = json.dumps(student_answers)
-        print(context['student_answers'])
-
+        
         # if the question hasn't been previously answered, uodate quiz state, create or update
         # progress record, and save the student answers
         if not previously_answered:
@@ -214,7 +227,57 @@ def process_quiz_question(request, subtopic_id, question_id):
             # save the student answers in the StudentAnswer model
             save_answers(request, subtopic_id, question_id, student_answers)
 
-        return render(request, "quizes/quiz_layout.html", context)     
+        return render(request, "quizes/quiz_layout.html", context)  
+
+def create_results_dictionary(question_id, student_answers):
+    question = get_object_or_404(Question, id=question_id)
+    results_dict = {}
+    # get all the correct answers from the Choice model in list form. Using sets allows for easy comparisions
+    correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
+
+    # create a set of student choices
+    student_selected_choices = set()
+
+    for answer in student_answers:
+        choice_id = int(answer)
+                
+        choice = get_object_or_404(Choice, id=choice_id)
+        results_dict[choice_id] = {
+            "is_correct": choice.is_correct,
+            "selected_by_student": True
+        }
+        student_selected_choices.add(choice_id)        
+
+    # For multiple answer questions, there are 2 edge cases to consider:
+    # 1) The student didn't choose all the correct answers
+    # 2) The student chose all the correct answers but also chose an additional incorrect answer
+
+    # student missed 1 or more correct answers
+    missed_correct_answers = correct_choices - student_selected_choices
+    # student chose all the correct answers + 1 or more incorrect answers
+    extra_incorrect_answers = student_selected_choices - correct_choices
+
+    # add missed correct answers to the results_dict. The student didn't choose all the correct answers
+    for choice_id in missed_correct_answers:
+        results_dict[choice_id] = {
+            "is_correct": True,
+            "selected_by_student": False
+        }
+
+    # add any extra incorrect answer to results_dict
+    for choice_id in extra_incorrect_answers:
+        # update existing entry to flag it as an extra incorrect answer
+        if choice_id in results_dict:
+            results_dict[choice_id]["is_extra_incorrect"] = True
+        else:
+            # add to results_dict if not already present
+            results_dict[choice_id] = {
+                "is_correct": False,
+                "selected_by_student": True,
+                "is_extra_incorrect": True
+            }
+
+    return results_dict
 
 def grade_quiz(results_dict, question_type):
     if question_type in ['True/False', 'Multiple Choice']:
@@ -408,7 +471,6 @@ def get_previous_questions_answered(request, subtopic_id):
     )
     
     if not student_answers.exists():
-        messages.error(request, "StudentAnswer record does not exist for this user.")
         return []
     else:
         answer_question_ids = [answer.question_id for answer in student_answers] 
@@ -495,7 +557,7 @@ def delete_student_answers(request, subtopic_id):
 
 def build_quiz_context(request, subtopic_id, question_id):
     question = get_object_or_404(Question, id=question_id)
-    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('id')
+    questions = Question.objects.filter(subtopic_id=subtopic_id).order_by('display_order', 'id')
     topic = question.subtopic.topic
     button_type = request.GET.get('button_type')
     page_number = request.POST.get('page', 1)
