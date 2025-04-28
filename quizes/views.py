@@ -77,21 +77,8 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     
     # retrieve the question to be displayed
     question = page_obj.object_list[0]
-    question_type = question.question_type.name
 
-    # retrieve any previously answered questions
-    answered_question_ids = get_previous_questions_answered(request, subtopic_id)
-    if answered_question_ids:
-        previous_answers = {}
-        for question_id in answered_question_ids:
-            student_answers = get_student_answers(request, subtopic_id, question_id)
-            results_dict = create_results_dictionary(question_id, student_answers)
-            correct_answer = grade_quiz(results_dict, question_type)
-            previous_answers[question_id] = correct_answer
-       
-        context['previous_answers'] = json.dumps(previous_answers)
-
-
+    # build the context dictionary
     context = {
         'topic_id': topic_id,
         'topic_name': topic_name,
@@ -104,8 +91,12 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'button_type': button_type, 
         'page_obj': page_obj,
         'page_number': page_number,
-        'paginator': paginator,  
+        'paginator': paginator, 
     }
+
+    previous_answers = build_previous_answers(request, subtopic_id)
+    if previous_answers:
+        context['previous_answers'] = json.dumps(previous_answers)   
 
     return render(request, "quizes/quiz_layout.html", context)
 
@@ -226,6 +217,11 @@ def process_quiz_question(request, subtopic_id, question_id):
 
             # save the student answers in the StudentAnswer model
             save_answers(request, subtopic_id, question_id, student_answers)
+        
+        # build the previous_answers dictionary for updating the progress bar
+        previous_answers = build_previous_answers(request, subtopic_id)
+        if previous_answers:
+            context['previous_answers'] = json.dumps(previous_answers) 
 
         return render(request, "quizes/quiz_layout.html", context)  
 
@@ -577,7 +573,34 @@ def build_quiz_context(request, subtopic_id, question_id):
         'page_obj': page_obj,
         'page_number': page_number,
         'paginator': paginator,
+        
     }
+
+def build_previous_answers(request, subtopic_id):
+    previous_answers = {}
+    answered_question_ids = StudentAnswer.objects.filter(
+        learner = request.user,
+        subtopic_id = subtopic_id
+    ).values_list('question_id', flat=True).distinct()
+
+    if not answered_question_ids:
+        return {}
+    
+    # fetch all the Question objects
+    questions = Question.objects.filter(id__in=answered_question_ids).select_related('question_type')
+    questions_dict = {}
+    for question in questions:
+        questions_dict[question.id] = question
+    
+    for question_id in answered_question_ids:
+        question = questions_dict.get(question_id)
+        question_type = question.question_type.name
+        student_answers = get_student_answers(request, subtopic_id, question_id)
+        results_dict = create_results_dictionary(question_id, student_answers)
+        correct_answer = grade_quiz(results_dict, question_type)
+        previous_answers[question_id] = correct_answer
+
+    return previous_answers
 
 def update_quiz_state(request, subtopic_id, correct_answer):
     session_key = f'quiz_state_{subtopic_id}'

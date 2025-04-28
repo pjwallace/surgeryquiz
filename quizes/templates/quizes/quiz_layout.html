@@ -175,15 +175,21 @@
             const quizMode = '{{ button_type }}';                               
         </script>
 
-        <script src="{% static 'quizes/script_quiz.js' %}"></script>   
-        
+        <script src="{% static 'quizes/script_quiz.js' %}"></script> 
+
+        <!--
         {% if correct_answer is not None %}
             <script>
                 const questionId = '{{ question.id }}';
-                const correctAnswer = '{{ correct_answer|yesno:"true,false" }}'; 
-                updateProgressBar(questionId, correctAnswer);
+                const correctAnswer = '{{ correct_answer|yesno:"true,false" }}';
+                console.log(correctAnswer);
+                const answerDict = {};
+                answerDict[questionId] = correctAnswer;
+                console.log(answerDict);
+                updateProgressBar(answerDict);
             </script>
         {% endif %}
+        -->
 
         {% if results_dict %}
             <script>
@@ -198,7 +204,15 @@
                 const studentAnswers = JSON.parse('{{ student_answers|escapejs }}');
                 formatAnsweredQuestion(studentAnswers);
             </script>
-        {% endif %}   
+        {% endif %}  
+        
+        {% if previous_answers %}
+            <script>
+                const previousAnswers = JSON.parse('{{ previous_answers|escapejs }}');
+                updateProgressBar(previousAnswers);
+            </script>
+        {% endif %}
+
 
     </body>
 
