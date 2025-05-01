@@ -1,16 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
-from django.db import IntegrityError
 from management.models import Topic, Subtopic, Question, Choice, Explanation
 from quizes.models import Progress, StudentAnswer
 import json
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import time
 import math
 from django.db import transaction
 
@@ -75,8 +74,10 @@ def load_quiz_layout(request, subtopic_id, topic_id):
             'subtopic_id': subtopic_id,
         }
     
-    # retrieve the question to be displayed
+    # retrieve the question to be displayed and question type
     question = page_obj.object_list[0]
+    question_id = question.id
+    question_type = question.question_type.name 
 
     # build the context dictionary
     context = {
@@ -85,8 +86,9 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'subtopic_id': subtopic_id,
         'subtopic_name': subtopic_name,
         'question': question,
+        'question_type': question_type,
         'questions': questions,
-        'question_id': question.id,
+        'question_id': question_id,
         'question_count': questions_count,       
         'button_type': button_type, 
         'page_obj': page_obj,
@@ -94,6 +96,24 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'paginator': paginator, 
     }
 
+    # determine if the question to be displayed has been previously answered
+    previously_answered = StudentAnswer.objects.filter(
+        learner = request.user,
+        subtopic_id = subtopic_id,
+        question_id = question_id
+    ).exists()
+
+    # if previously answered, return the choice ids for each answer choice selected
+    if previously_answered:
+        student_answers = get_student_answers(request, subtopic_id, question_id)
+
+        # grade the quiz question 
+        results_dict = create_results_dictionary(question_id, student_answers)
+        context['results_dict'] = json.dumps(results_dict) 
+        # needed for answered question formatting 
+        context['student_answers'] = json.dumps(student_answers)
+    
+    # rebuild the progress bar showing the answered status of each quiz question
     previous_answers = build_previous_answers(request, subtopic_id)
     if previous_answers:
         context['previous_answers'] = json.dumps(previous_answers)   
@@ -143,64 +163,14 @@ def process_quiz_question(request, subtopic_id, question_id):
         
         # grade the quiz question 
         results_dict = create_results_dictionary(question_id, student_answers)                  
-        #results_dict = {}
-        # get all the correct answers from the Choice model in list form. Using sets allows for easy comparisions
-        #correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
-
-        # create a set of student choices
-        #student_selected_choices = set()
-
-        #for answer in student_answers:
-        #    choice_id = int(answer)
-            
-        #    try:
-        #        choice = get_object_or_404(Choice, id=choice_id)
-        #        results_dict[choice_id] = {
-        #            "is_correct": choice.is_correct,
-        #            "selected_by_student": True
-        #        }
-        #        student_selected_choices.add(choice_id)
-               
-        #    except Choice.DoesNotExist:
-        #        messages.error(request, "Answer choice not found.")
-        #        return render(request, "quizes/quiz_layout.html", context)
-
-        # For multiple answer questions, there are 2 edge cases to consider:
-        # 1) The student didn't choose all the correct answers
-        # 2) The student chose all the correct answers but also chose an additional incorrect answer
-
-        # student missed 1 or more correct answers
-        #missed_correct_answers = correct_choices - student_selected_choices
-        # student chose all the correct answers + 1 or more incorrect answers
-        #extra_incorrect_answers = student_selected_choices - correct_choices
-
-        # add missed correct answers to the results_dict. The student didn't choose all the correct answers
-        #for choice_id in missed_correct_answers:
-        #    results_dict[choice_id] = {
-        #        "is_correct": True,
-        #        "selected_by_student": False
-        #    }
-
-        # add any extra incorrect answer to results_dict
-        #for choice_id in extra_incorrect_answers:
-            # update existing entry to flag it as an extra incorrect answer
-        #    if choice_id in results_dict:
-        #        results_dict[choice_id]["is_extra_incorrect"] = True
-        #    else:
-                # add to results_dict if not already present
-        #        results_dict[choice_id] = {
-        #            "is_correct": False,
-        #            "selected_by_student": True,
-        #            "is_extra_incorrect": True
-        #        }
         
         correct_answer = grade_quiz(results_dict, question_type)
-        context['correct_answer'] = correct_answer # needed for javascript updateProgressBar()
+        #context['correct_answer'] = correct_answer # needed for javascript updateProgressBar()
         # needed for Javascript highlightAnswers()
-        context['question_type'] = question_type
-        context['results_dict'] = json.dumps(results_dict) 
+        #context['question_type'] = question_type
+        #context['results_dict'] = json.dumps(results_dict) 
         # needed for answered question formatting 
-        context['student_answers'] = json.dumps(student_answers)
+        #context['student_answers'] = json.dumps(student_answers)
         
         # if the question hasn't been previously answered, uodate quiz state, create or update
         # progress record, and save the student answers
@@ -219,11 +189,19 @@ def process_quiz_question(request, subtopic_id, question_id):
             save_answers(request, subtopic_id, question_id, student_answers)
         
         # build the previous_answers dictionary for updating the progress bar
-        previous_answers = build_previous_answers(request, subtopic_id)
-        if previous_answers:
-            context['previous_answers'] = json.dumps(previous_answers) 
+        #previous_answers = build_previous_answers(request, subtopic_id)
+        #if previous_answers:
+        #    context['previous_answers'] = json.dumps(previous_answers) 
 
-        return render(request, "quizes/quiz_layout.html", context)  
+        page_number = request.POST.get('page')
+        button_type = request.POST.get('button_type')
+        topic_id = request.POST.get('topic_id')
+
+        url = reverse('load_quiz_layout', args=[subtopic_id, topic_id])
+        return redirect(f'{url}?page={page_number}&button_type={button_type}')
+
+
+        #return render(request, "quizes/quiz_layout.html", context)  
 
 def create_results_dictionary(question_id, student_answers):
     question = get_object_or_404(Question, id=question_id)
@@ -591,7 +569,10 @@ def build_previous_answers(request, subtopic_id):
     questions_dict = {}
     for question in questions:
         questions_dict[question.id] = question
-    
+
+    # build the dictionary that contains the correct answer for each question. 
+    # This will be used by the Javascript function updateProgressBar to indicate whether each
+    # answered question is correct or incorrect
     for question_id in answered_question_ids:
         question = questions_dict.get(question_id)
         question_type = question.question_type.name

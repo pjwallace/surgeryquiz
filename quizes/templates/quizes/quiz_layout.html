@@ -110,6 +110,8 @@
                     <input type="hidden" id="quizsubtopic-id" name="quizsubtopic-id" value="{{ subtopic_id }}">         
                     <input type="hidden" id="quizquestion-id" name="quizquestion-id" value="{{ question.id }}">
                     <input type="hidden" id="quiz-page-number" name="page" value="{{ page_obj.number }}">
+                    <input type="hidden" name="button_type" value="{{ button_type }}">
+                    <input type="hidden" name="topic_id" value="{{ topic_id }}">
 
                     <div class="quiz-question">
                         <p>{{ question.text}}</p>
