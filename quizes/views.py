@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
@@ -31,6 +32,7 @@ def dashboard(request):
     return render(request, 'quizes/dashboard.html', {'topics': topics})
     
 @login_required(login_url='login')
+@never_cache
 def load_quiz_layout(request, subtopic_id, topic_id):
     
     # get topic name for title

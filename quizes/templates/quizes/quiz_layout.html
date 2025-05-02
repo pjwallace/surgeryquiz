@@ -179,20 +179,6 @@
 
         <script src="{% static 'quizes/script_quiz.js' %}"></script> 
 
-        <!--
-        {% if correct_answer is not None %}
-            <script>
-                const questionId = '{{ question.id }}';
-                const correctAnswer = '{{ correct_answer|yesno:"true,false" }}';
-                console.log(correctAnswer);
-                const answerDict = {};
-                answerDict[questionId] = correctAnswer;
-                console.log(answerDict);
-                updateProgressBar(answerDict);
-            </script>
-        {% endif %}
-        -->
-
         {% if results_dict %}
             <script>
                 const questionType = '{{ question_type }}';
@@ -214,6 +200,16 @@
                 updateProgressBar(previousAnswers);
             </script>
         {% endif %}
+
+        <script>
+            window.addEventListener("pageshow", function(e) {
+                if (e.persisted) {
+                    // This page was restored from the back-forward cache (bfcache)
+                    window.location.reload();
+                }
+            });
+        </script>
+        
 
 
     </body>

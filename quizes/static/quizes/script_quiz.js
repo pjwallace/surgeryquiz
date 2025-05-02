@@ -314,7 +314,6 @@ async function processQuizQuestion(selectedAnswers, previouslyAnswered){
 }
 
 function updateProgressBar(previousAnswers) {
-    console.log(previousAnswers);
     for (const [questionId, wasCorrect] of Object.entries(previousAnswers)) {
         const circle = document.getElementById(`circle-${questionId}`);
         const check = document.getElementById(`check-${questionId}`);
