@@ -118,7 +118,7 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     # rebuild the progress bar showing the answered status of each quiz question
     previous_answers = build_previous_answers(request, subtopic_id)
     if previous_answers:
-        context['previous_answers'] = json.dumps(previous_answers)   
+        context['previous_answers'] = json.dumps(previous_answers)  
 
     return render(request, "quizes/quiz_layout.html", context)
 
@@ -164,21 +164,14 @@ def process_quiz_question(request, subtopic_id, question_id):
                 return render(request, "quizes/quiz_layout.html", context)
         
         # grade the quiz question 
-        results_dict = create_results_dictionary(question_id, student_answers)                  
-        
+        results_dict = create_results_dictionary(question_id, student_answers)                          
         correct_answer = grade_quiz(results_dict, question_type)
-        #context['correct_answer'] = correct_answer # needed for javascript updateProgressBar()
-        # needed for Javascript highlightAnswers()
-        #context['question_type'] = question_type
-        #context['results_dict'] = json.dumps(results_dict) 
-        # needed for answered question formatting 
-        #context['student_answers'] = json.dumps(student_answers)
         
-        # if the question hasn't been previously answered, uodate quiz state, create or update
+        # if the question hasn't been previously answered, update quiz state, create or update
         # progress record, and save the student answers
         if not previously_answered:
             
-            update_quiz_state(request, subtopic_id, correct_answer)
+            quiz_state = update_quiz_state(request, subtopic_id, correct_answer)
 
             # check if the progress record exists or must be created 
             try:           
@@ -189,11 +182,10 @@ def process_quiz_question(request, subtopic_id, question_id):
 
             # save the student answers in the StudentAnswer model
             save_answers(request, subtopic_id, question_id, student_answers)
-        
-        # build the previous_answers dictionary for updating the progress bar
-        #previous_answers = build_previous_answers(request, subtopic_id)
-        #if previous_answers:
-        #    context['previous_answers'] = json.dumps(previous_answers) 
+
+            # check if quiz is completed
+            if quiz_state['question_count'] == quiz_state['questions_answered']:
+                process_completed_quiz(request, subtopic_id, question_id, quiz_state)
 
         page_number = request.POST.get('page')
         button_type = request.POST.get('button_type')
@@ -201,9 +193,6 @@ def process_quiz_question(request, subtopic_id, question_id):
 
         url = reverse('load_quiz_layout', args=[subtopic_id, topic_id])
         return redirect(f'{url}?page={page_number}&button_type={button_type}')
-
-
-        #return render(request, "quizes/quiz_layout.html", context)  
 
 def create_results_dictionary(question_id, student_answers):
     question = get_object_or_404(Question, id=question_id)
@@ -459,44 +448,37 @@ def get_previous_questions_answered(request, subtopic_id):
         return answer_question_ids
 
 @login_required(login_url='login')
-def process_completed_quiz(request, subtopic_id):
-    if request.method == 'PUT':
-        learner = request.user
-        data = json.loads(request.body)
-        question_count = int(data.get("question_count", ''))
-        correct_answers = int(data.get("correct_answers", ''))
-        quiz_score = math.ceil((correct_answers / question_count) * 100)
+def process_completed_quiz(request, subtopic_id, question_id, quiz_state):    
+    learner = request.user
+    
+    question_count = quiz_state['question_count']
+    correct_answers = quiz_state['correct_answers']
+    quiz_score = math.ceil((correct_answers / question_count) * 100)
 
-        # retrieve the progress record
-        try:
-            progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
-            
-        except Progress.DoesNotExist:
-            return JsonResponse({"success": False, 
-                "messages": [{"message": "Progress record does not exist.", "tags": "danger"}]}, status=400)
-        
-        # update the initial score if necessary and the latest score
-        try:
-            if progress.initial_score == 0 or progress.initial_score == None:
-                progress.initial_score = quiz_score 
-                progress.latest_score = quiz_score 
-            else:
-                progress.latest_score = quiz_score
+    context = build_quiz_context(request, subtopic_id, question_id)
 
-            progress.save()
+    # retrieve the progress record
+    try:
+        progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
+        
+    except Progress.DoesNotExist:
+        messages.error(request, "Progress record doesn't exist.")
+        return render(request, "quizes/quiz_layout.html", context)
+        
+    # update the initial score if necessary and the latest score
+    try:
+        if progress.initial_score == 0 or progress.initial_score == None:
+            progress.initial_score = quiz_score 
+            progress.latest_score = quiz_score 
+        else:
+            progress.latest_score = quiz_score
 
-        except Exception as e:
-            return JsonResponse({"success": False, 
-                "messages": [{"message": f"An error occurred: {str(e)}", "tags": "danger"}]}, status=500)
+        progress.save()
+
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return render(request, "quizes/quiz_layout.html", context)
         
-        context = {
-            "quiz_score": quiz_score,
-            "question_count": question_count,
-            "correct_answers": correct_answers
-        }
-        quiz_score_html = render_to_string('quizes/quiz_score.html', context)
-        
-        return JsonResponse({"success": True, "quiz_score_html": quiz_score_html })
     
 @login_required(login_url='login')
 def delete_student_answers(request, subtopic_id):
@@ -599,4 +581,6 @@ def update_quiz_state(request, subtopic_id, correct_answer):
 
     request.session[session_key] = quiz_state
     request.session.modified = True
+
+    return quiz_state
     

@@ -161,7 +161,7 @@ body, html {
 #view-quiz-results {
     display: block;
     margin: 30px auto 0 auto; /* top margin + center horizontally */
-    width: 200px; /* optional */
+    width: 200px; 
 }
 
 
