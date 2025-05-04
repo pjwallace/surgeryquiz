@@ -62,6 +62,7 @@ def load_quiz_layout(request, subtopic_id, topic_id):
 
     # Unique key for this quiz/subtopic
     session_key = f'quiz_state_{subtopic_id}'
+    quiz_state = request.session.get(session_key, {})
 
     #Initialize the quiz state
     if session_key not in request.session:
@@ -114,6 +115,16 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         context['results_dict'] = json.dumps(results_dict) 
         # needed for answered question formatting 
         context['student_answers'] = json.dumps(student_answers)
+
+        # check if the quiz is complete
+        if quiz_state['question_count'] == quiz_state['questions_answered']:
+            context['quiz_completed'] = True
+            context['question_count'] = quiz_state['question_count']
+            context['correct_answers'] = quiz_state['correct_answers']
+            context['quiz_score'] = math.ceil((quiz_state['correct_answers'] / quiz_state['question_count']) * 100)
+
+        else:
+            context['quiz_completed'] = False
     
     # rebuild the progress bar showing the answered status of each quiz question
     previous_answers = build_previous_answers(request, subtopic_id)
@@ -468,11 +479,10 @@ def process_completed_quiz(request, subtopic_id, question_id, quiz_state):
     # update the initial score if necessary and the latest score
     try:
         if progress.initial_score == 0 or progress.initial_score == None:
-            progress.initial_score = quiz_score 
-            progress.latest_score = quiz_score 
-        else:
-            progress.latest_score = quiz_score
+            progress.initial_score = quiz_score
 
+        progress.latest_score = quiz_score 
+        
         progress.save()
 
     except Exception as e:

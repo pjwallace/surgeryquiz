@@ -164,7 +164,17 @@
                 </a>
             {% endfor %}
         </div>
-       
+
+        <!-- Quiz Score Dialog-->
+        <dialog id="quiz-score-dialog">
+            <h2>Score = {{ quiz_score }}% ({{ correct_answers }} correct of {{ question_count }})</h2>
+
+            <p>You can review the questions you missed by using the progress bar.</p>
+
+            <p>You can navigate back to your dashboard and retake this quiz again.</p>
+            
+            <button type="button" id="cancel-quiz-score-button" class="btn btn-close"></button>          
+         </dialog>       
 
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" 
             integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" 
@@ -201,6 +211,15 @@
             </script>
         {% endif %}
 
+        {% if quiz_completed %}
+            <script>
+                viewQuizResults = document.getElementById('view-quiz-results');
+                if (viewQuizResults){
+                    viewQuizResults.style.display = 'block';
+                }
+            </script>
+        {% endif %}
+            
         <script>
             window.addEventListener("pageshow", function(e) {
                 if (e.persisted) {
@@ -210,8 +229,6 @@
             });
         </script>
         
-
-
     </body>
 
 </html>
