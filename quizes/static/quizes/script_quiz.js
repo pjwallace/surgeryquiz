@@ -294,7 +294,6 @@ function updateProgressBar(previousAnswers) {
     }
 }
 
-
 function highlightAnswers(resultsDict, questionType){    
     // loop over each key, value pair in resultsDict
     for (const [choice_id, result] of Object.entries(resultsDict)){
@@ -320,7 +319,6 @@ function highlightAnswers(resultsDict, questionType){
             }
         }
     }
-
 }
 
 function formatAnsweredQuestion(studentAnswers){                    
@@ -555,7 +553,10 @@ function displayQuizScoreDialog(){
 
 function cancelQuizScoreDialog(){
     const dialogElement = document.getElementById('quiz-score-dialog');
-    dialogElement.close();
+
+    if (dialogElement) {
+        dialogElement.close();
+    }
 }
 
 function clearMessages(){

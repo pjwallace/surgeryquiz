@@ -159,18 +159,19 @@ def process_quiz_question(request, subtopic_id, question_id):
         student_answers = request.POST.getlist("answer")
 
         context = build_quiz_context(request, subtopic_id, question_id) 
+        previous_answers = build_previous_answers(request, subtopic_id)
+        if previous_answers:
+            context['previous_answers'] = json.dumps(previous_answers)
 
         # only validate the answer if it hasn't been previously answered
         if not previously_answered:       
             # must select at least one correct answer
-            if not student_answers:
+            if not student_answers:                
                 messages.error(request, "You didn't select an answer.")
                 return render(request, "quizes/quiz_layout.html", context)
             
-            # if multiple answer question, must select at least 2 answers
-        
-        if not previously_answered:
-            if question.question_type.name == 'Multiple Answer' and len(student_answers)< 2:
+            # if multiple answer question, must select at least 2 answers              
+            if question.question_type.name == 'Multiple Answer' and len(student_answers)< 2:               
                 messages.error(request, "You must select at least two answers for this type of question.")
                 return render(request, "quizes/quiz_layout.html", context)
         

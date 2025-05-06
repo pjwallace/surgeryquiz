@@ -157,11 +157,16 @@ body, html {
     font-size: 1.2rem;
 }
 
-#submit-quiz-question,
-#view-quiz-results {
+#submit-quiz-question{
     display: block;
     margin: 30px auto 0 auto; /* top margin + center horizontally */
     width: 200px; 
+}
+
+#view-quiz-results {
+    display: block;
+    margin: 30px auto 0 auto; /* top margin + center horizontally */
+    width: 300px; 
 }
 
 
@@ -246,6 +251,52 @@ body, html {
     display: inline-block;
     padding: 10px 20px;
     font-size: 1rem;
+}
+
+/* Dialog box */
+dialog {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+}
+
+dialog::backdrop {
+    background-color: rgba(0,0,0,0.5);
+}
+
+dialog h2 {
+    margin: 0 0 10px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+dialog p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+#cancel-quiz-score-button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+.score-high { 
+    color: green; 
+    font-weight: bold;
+}
+
+.score-low { 
+    color: red; 
+    font-weight: bold;
+}
+
+.score-info {
+    color: #6c757d;
 }
 
 /* media queries */

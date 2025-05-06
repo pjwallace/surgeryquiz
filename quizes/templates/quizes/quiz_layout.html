@@ -167,13 +167,17 @@
 
         <!-- Quiz Score Dialog-->
         <dialog id="quiz-score-dialog">
-            <h2>Score = {{ quiz_score }}% ({{ correct_answers }} correct of {{ question_count }})</h2>
+            <h2 class="{% if quiz_score >= 80 %}score-high{% else %}score-low{% endif %}">
+                Score = {{ quiz_score }}% ({{ correct_answers }} correct of {{ question_count }})
+            </h2>
 
-            <p>You can review the questions you missed by using the progress bar.</p>
+            <p class="score-info">You can review the questions you missed by using the progress bar.</p>
 
-            <p>You can navigate back to your dashboard and retake this quiz again.</p>
+            <p class="score-info">You can navigate back to your dashboard and retake this quiz again.</p>
             
-            <button type="button" id="cancel-quiz-score-button" class="btn btn-close"></button>          
+            <button type="button" id="cancel-quiz-score-button" class="btn btn-secondary">
+                Close
+            </button>          
          </dialog>       
 
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" 
