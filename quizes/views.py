@@ -125,7 +125,11 @@ def load_quiz_layout(request, subtopic_id, topic_id):
 
         else:
             context['quiz_completed'] = False
-    
+
+        # check if an explanation exists for the question
+        explanation_text = load_quiz_question_explanation(question_id)
+        context['explanation_text'] = explanation_text
+   
     # rebuild the progress bar showing the answered status of each quiz question
     previous_answers = build_previous_answers(request, subtopic_id)
     if previous_answers:
@@ -419,24 +423,15 @@ def get_student_answers(request, subtopic_id, question_id):
     return list(selected_choice_ids)
 
         
-@login_required(login_url='login')
-def load_quiz_question_explanation(request, question_id):
+def load_quiz_question_explanation(question_id):
     try:
         explanation = Explanation.objects.get(question_id=question_id)
-        context = {
-            'explanation_text': explanation.text
-        }
-       
-        quiz_explanation_html = render_to_string('quizes/quiz_explanation.html', context)
+        explanation_text = explanation.text
+        return explanation_text        
         
     except Explanation.DoesNotExist:
-        return JsonResponse({"success": False})
+        return None
     
-    except Exception as e:
-            return JsonResponse({"success": False, 
-                "messages": [{"message": f"An error occurred: {str(e)}", "tags": "danger"}]}, status=500)
-    
-    return JsonResponse({"success": True, "quiz_explanation_html": quiz_explanation_html})
 
 @login_required(login_url='login')
 def get_previous_questions_answered(request, subtopic_id):

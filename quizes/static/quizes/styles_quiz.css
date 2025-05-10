@@ -103,24 +103,28 @@ body, html {
 
 #explanation-container {
     flex-shrink: 0; 
-    padding: 10px;
-    background-color: #fff;
-    margin-bottom: 10px; 
-    overflow-wrap: break-word; /* Ensure long words break and wrap */
-    word-wrap: break-word; /* Compatibility for older browsers */
-    word-break: break-word; /* Additional compatibility */
+    padding: 0;
+    background-color: transparent;
+    margin-bottom: 20px; 
+    width: 100%;           /* Force it to stretch */
+    max-width: 900px;      /* Match quiz-wrapper */
+    box-sizing: border-box;
 }
 
 .explanation-wrapper{
-    margin: 20px auto; 
-    padding: 20px; 
-    background-color: #f9f9f9; 
-    max-width: 800px; 
-    border: 1px solid #ddd;
-    border-radius: 8px; 
-    overflow-wrap: break-word; /* Ensure long words break and wrap */
-    word-wrap: break-word; /* Compatibility for older browsers */
-    word-break: break-word; /* Additional compatibility */  
+    padding: 20px;
+    background-color: #f8f9fa; 
+    max-width: 900px;
+    width: 100%; /* Add this to match .quiz-wrapper */
+    box-sizing: border-box; /* Add this to match .quiz-wrapper */
+    border-left: 5px solid #007bff; /* visual anchor */
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* subtle elevation */
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .quiz-question p{
@@ -207,21 +211,21 @@ body, html {
     visibility: hidden; /* Hide the element but keep its space */
 }
 
-#pagination-container-bottom{
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 columns: left button, right button */
-    align-items: center; 
-    width: 100%; 
-
+#pagination-container-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
-#previous-button-bottom {
-    justify-self: start; /* Align the previous button to the left */
-}
-
+#previous-button-bottom,
 #next-button-bottom {
-    justify-self: end; /* Align the next button to the right */
+    margin: 0;
+    width: 100px;
 }
+
 
 #view-quiz-results{
     display: none;
@@ -354,22 +358,6 @@ dialog p {
         width: 100px;
     }
 
-    /*
-    #pagination-container{
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    #pagination-container h2{
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-align: center;
-    }
-    #previous-button, #next-button {
-        justify-self: center;
-        padding: 10px 15px;
-        margin: 5px 0;
-    }
-    */
     .hidden {
         display: none; 
     }

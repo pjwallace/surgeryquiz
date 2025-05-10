@@ -149,7 +149,36 @@
             
             </div>            
 
-            <div id="explanation-container"></div>
+            {% if explanation_text %}
+                <div id="explanation-container">
+                    <hr>
+                    <div class="explanation-wrapper">       
+
+                        <h3>Explanation</h3>
+
+                        <p>{{ explanation_text|linebreaks }}</p>
+
+                        
+                    </div>
+                </div>
+                <div id="pagination-container-bottom">
+                    <div>                      
+                        {% if page_obj.has_previous %}
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
+                                id="previous-button-bottom" class="btn btn-info">Previous
+                            </a>                       
+                        {% endif %}                       
+                    </div>
+                    <div>
+                        {% if page_obj.has_next %}
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
+                                id="next-button-bottom" class="btn btn-info">Next                        
+                            </a>                       
+                        {% endif %} 
+                    </div>  
+                </div>
+            {% endif %}
+
         </main>
 
         <div id="progress-container">
