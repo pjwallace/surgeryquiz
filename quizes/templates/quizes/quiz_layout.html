@@ -53,13 +53,6 @@
                 </ul>
             </div>
         </nav>
-        <!--
-        
-        
-        <input type="hidden" id="quiz-subtopic" value="{{ subtopic_id }}">
-        <input type="hidden" id="question-count" value="{{ question_count }}">
-        <input type="hidden" id="button-type" value="{{ button_type }}">
-        -->
 
         <div id="quiz-title-container"> 
             <h2>{{ topic_name }}: {{ subtopic_name }}</h2>            
@@ -85,7 +78,7 @@
                 <div id="pagination-container">
                     <div>                      
                         {% if page_obj.has_previous %}
-                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}"
                                 id="previous-button" class="btn btn-info">Previous
                             </a>                       
                         {% endif %}
@@ -95,7 +88,7 @@
 
                     <div>
                         {% if page_obj.has_next %}
-                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}"
                                 id="next-button" class="btn btn-info">Next                        
                             </a>                       
                         {% endif %} 
@@ -110,7 +103,6 @@
                     <input type="hidden" id="quizsubtopic-id" name="quizsubtopic-id" value="{{ subtopic_id }}">         
                     <input type="hidden" id="quizquestion-id" name="quizquestion-id" value="{{ question.id }}">
                     <input type="hidden" id="quiz-page-number" name="page" value="{{ page_obj.number }}">
-                    <input type="hidden" name="button_type" value="{{ button_type }}">
                     <input type="hidden" name="topic_id" value="{{ topic_id }}">
 
                     <div class="quiz-question">
@@ -164,14 +156,14 @@
                 <div id="pagination-container-bottom">
                     <div>                      
                         {% if page_obj.has_previous %}
-                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}&button_type={{ button_type}}"
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.previous_page_number}}"
                                 id="previous-button-bottom" class="btn btn-info">Previous
                             </a>                       
                         {% endif %}                       
                     </div>
                     <div>
                         {% if page_obj.has_next %}
-                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}&button_type={{ button_type}}"
+                            <a href="{% url 'load_quiz_layout' subtopic_id topic_id %}?page={{ page_obj.next_page_number}}"
                                 id="next-button-bottom" class="btn btn-info">Next                        
                             </a>                       
                         {% endif %} 
@@ -216,9 +208,6 @@
             integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" 
             crossorigin="anonymous"></script>
 
-        <script>
-            const quizMode = '{{ button_type }}';                               
-        </script>
 
         <script src="{% static 'quizes/script_quiz.js' %}"></script> 
 
@@ -244,7 +233,7 @@
             </script>
         {% endif %}
 
-        {% if quiz_completed %}
+        {% if quiz_completed and not review_mode %}
             <script>
                 viewQuizResults = document.getElementById('view-quiz-results');
                 if (viewQuizResults){

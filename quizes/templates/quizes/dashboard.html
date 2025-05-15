@@ -135,7 +135,7 @@
                                                                                                     
                                                 {% elif subtopic.progress_record.questions_answered < subtopic.question_count %}
                                                     <!-- Quiz in progress. Show resume button-->
-                                                    <a href="{% url 'resume_quiz' subtopic.id %}?button_type=resume"
+                                                    <a href="{% url 'load_quiz_layout' subtopic.id topic.id %}?button_type=resume"
                                                         class="btn btn-sm btn-primary">Resume</a>
 
                                                 {% else %}

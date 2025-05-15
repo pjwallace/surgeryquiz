@@ -354,66 +354,65 @@ function formatAnsweredQuestion(studentAnswers){
     }
 }
 
-async function loadQuizQuestionExplanation(questionId, subtopicId) {
-    const explanationContainer = document.getElementById('explanation-container');
-    explanationContainer.innerHTML = '';
+//async function loadQuizQuestionExplanation(questionId, subtopicId) {
+//    const explanationContainer = document.getElementById('explanation-container');
+//    explanationContainer.innerHTML = '';
         
-    try {
-        const response = await fetch(`/quizes/home/load_quiz_question_explanation/${questionId}`);
-        const data = await response.json();
+//    try {
+//        const response = await fetch(`/quizes/home/load_quiz_question_explanation/${questionId}`);
+//        const data = await response.json();
 
-        if (data.success) {
-            //console.log('Explanation fetched:', data.quiz_explanation_html);
+//        if (data.success) {
 
-            explanationContainer.innerHTML = data.quiz_explanation_html;
+//            explanationContainer.innerHTML = data.quiz_explanation_html;
                       
-            const previousButtonBottom = document.getElementById('previous-button-bottom');
-            if (previousButtonBottom){
-                if (quizState.hasPrevious){
-                    previousButtonBottom.classList.remove('hidden');
+//            const previousButtonBottom = document.getElementById('previous-button-bottom');
+//            if (previousButtonBottom){
+//                if (quizState.hasPrevious){
+//                    previousButtonBottom.classList.remove('hidden');
 
                     // remove the old event listener to prevent multiple event listeners for the same button
-                    previousButtonBottom.removeEventListener('click', previousPageHandler);
+//              previousButtonBottom.removeEventListener('click', previousPageHandler);
 
                     // define previousPageHandler
-                    function previousPageHandler(){
-                        previousPage(subtopicId, quizState.pageNumber);    
-                    }
+//                    function previousPageHandler(){
+//                        previousPage(subtopicId, quizState.pageNumber);    
+//                    }
                     // add the event listener
-                    previousButtonBottom.addEventListener('click', previousPageHandler);
-                }else{
-                    previousButtonBottom.classList.add('hidden');
-                }
-            }   
+//                    previousButtonBottom.addEventListener('click', previousPageHandler);
+//                }else{
+//                    previousButtonBottom.classList.add('hidden');
+//                }
+//            }   
                 
             // if there isn't a next quiz question, hide the next button;
             // else display the button and add an event listener
-            const nextButtonBottom = document.getElementById('next-button-bottom');
-            if (nextButtonBottom){
-                if (quizState.hasNext){
-                    nextButtonBottom.classList.remove('hidden');
+//            const nextButtonBottom = document.getElementById('next-button-bottom');
+//            if (nextButtonBottom){
+//                if (quizState.hasNext){
+//                    nextButtonBottom.classList.remove('hidden');
 
                     // remove the old event listener to prevent multiple event listeners for the same button
-                    nextButtonBottom.removeEventListener('click', nextPageHandler);
+//                    nextButtonBottom.removeEventListener('click', nextPageHandler);
 
                     // define nextPageHandler
-                    function nextPageHandler(){
-                        nextPage(subtopicId, quizState.pageNumber, quizState.totalPages);    
-                    }
+//                    function nextPageHandler(){
+//                        nextPage(subtopicId, quizState.pageNumber, quizState.totalPages);    
+//                    }
                         // add the event handler to the next button
-                    nextButtonBottom.addEventListener('click', nextPageHandler);
-                }else{
-                    nextButtonBottom.classList.add('hidden');                        
-                }
-            }
-        } else {
+//                    nextButtonBottom.addEventListener('click', nextPageHandler);
+//                }else{
+//                    nextButtonBottom.classList.add('hidden');                        
+//                }
+//            }
+//        } else {
             
-            console.error('There is no explanation for this question:', data.messages);
-        }
-    } catch (error) {
-        console.error('Error loading explanation:', error); 
-    }
-}
+//            console.error('There is no explanation for this question:', data.messages);
+//        }
+//    } catch (error) {
+//        console.error('Error loading explanation:', error); 
+//    }
+//}
 
 async function resumeQuiz(subtopicId){
     // get all the previous answers
@@ -469,17 +468,17 @@ function getFirstUnansweredQuestion(){
     if (progressContainer){
         const questionLinks = document.querySelectorAll('#progress-container a');
         for (let link of questionLinks){
-            const subtopicId = link.getAttribute('data-subtopic-id');
+            //const subtopicId = link.getAttribute('data-subtopic-id');
             const questionId = link.getAttribute('data-question-id');
             const circleIcon = document.getElementById(`circle-${questionId}`);
 
             // if the circle icon is still visible, it is an unanswered question
             if (circleIcon && window.getComputedStyle(circleIcon).display !== 'none') {
                 const pageNumber = link.getAttribute('data-page');
-                loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
+                //loadQuizQuestionsAndAnswers(subtopicId, pageNumber);
                 
                 // exit the loop after the first unanswered question is found
-                return;
+                return pageNumber;
             }
 
         }
@@ -522,22 +521,6 @@ function getFirstUnansweredQuestion(){
 //    } catch (error){
 //        console.error('Error saving quiz scorer:', error);
 //    }
-//}
-
-//function displayQuizScore(quizScoreHTML){
-    // blank out the containers
-//const quizContainer = document.getElementById('quiz-container');
-//    quizContainer.innerHTML = '';
-
-//   const explanationContainer = document.getElementById('explanation-container');
-//    explanationContainer.innerHTML = '';
-
-//    const quizScoreContainer = document.getElementById('quiz-score-container');
-//    quizScoreContainer.style.display = 'block';
-//    quizScoreContainer.innerHTML = '';
-
-//    quizScoreContainer.innerHTML = quizScoreHTML;
-
 //}
 
 function displayQuizScoreDialog(){     

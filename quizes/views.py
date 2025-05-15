@@ -49,10 +49,20 @@ def load_quiz_layout(request, subtopic_id, topic_id):
 
     # get the button type and page number
     button_type = request.GET.get('button_type')
-    page_number = request.GET.get('page', 1)
+    page_number = int(request.GET.get('page', 1))
 
-    # set up pagination
-    paginator = Paginator(questions, 1) # 1 question/page
+    # if resuming a quiz, get the first unanswered question
+    if button_type == 'resume':
+        page_number = get_first_unanswered_question(subtopic_id, request.user)
+        if page_number is None:    
+            messages.info(
+                request,
+                "You've already answered all the questions in this quiz. You can review or retake it from your dashboard."
+            )
+            return redirect('dashboard')
+
+    # set up pagination with 1 question/page
+    paginator = Paginator(questions, 1) 
     try:
         page_obj = paginator.page(page_number)
     except PageNotAnInteger:
@@ -62,27 +72,44 @@ def load_quiz_layout(request, subtopic_id, topic_id):
 
     # Unique key for this quiz/subtopic
     session_key = f'quiz_state_{subtopic_id}'
-    quiz_state = request.session.get(session_key, {})
+    #quiz_state = request.session.get(session_key, {})
 
     #Initialize the quiz state
     if session_key not in request.session:
+        # get progress record info regarding questions answered and total correct answers
+        # This is used when resuming a quiz
+        try:
+            progress = Progress.objects.get(learner=request.user, subtopic_id=subtopic_id)
+            questions_answered = progress.questions_answered
+            total_correct = progress.total_correct
+        except Progress.DoesNotExist:
+            questions_answered = 0
+            total_correct = 0
+
+        review_mode = False
+        if button_type == 'review':
+            review_mode = True
+
         # Only initialize once
         request.session[session_key] = {
             'page_number': int(page_number),
             'total_pages': paginator.num_pages,
             'question_count': questions.count(),
-            'questions_answered': 0,
-            'correct_answers': 0,
-            'incorrect_answers': 0,
+            'questions_answered': questions_answered,
+            'correct_answers': total_correct,
+            'incorrect_answers': questions_answered - total_correct,
             'subtopic_id': subtopic_id,
+            'review_mode': review_mode,
         }
+    quiz_state = request.session[session_key]
+    review_mode = quiz_state.get('review_mode', False)
     
-    # retrieve the question to be displayed and question type
+    # retrieve the single question to be displayed and question type
     question = page_obj.object_list[0]
     question_id = question.id
     question_type = question.question_type.name 
 
-    # build the context dictionary
+    # build the context dictionary used by the template
     context = {
         'topic_id': topic_id,
         'topic_name': topic_name,
@@ -93,59 +120,53 @@ def load_quiz_layout(request, subtopic_id, topic_id):
         'questions': questions,
         'question_id': question_id,
         'question_count': questions_count,       
-        'button_type': button_type, 
         'page_obj': page_obj,
         'page_number': page_number,
         'paginator': paginator, 
+        'review_mode': review_mode,
     }
 
-    # determine if the question to be displayed has been previously answered
-    previously_answered = StudentAnswer.objects.filter(
-        learner = request.user,
-        subtopic_id = subtopic_id,
-        question_id = question_id
-    ).exists()
-
-    # if previously answered, return the choice ids for each answer choice selected
-    if previously_answered:
-        student_answers = get_student_answers(request, subtopic_id, question_id)
-
-        # grade the quiz question 
-        results_dict = create_results_dictionary(question_id, student_answers)
-        context['results_dict'] = json.dumps(results_dict) 
-        # needed for answered question formatting 
-        context['student_answers'] = json.dumps(student_answers)
-
-        # check if the quiz is complete
-        if quiz_state['question_count'] == quiz_state['questions_answered']:
-            context['quiz_completed'] = True
-            context['question_count'] = quiz_state['question_count']
-            context['correct_answers'] = quiz_state['correct_answers']
-            context['quiz_score'] = math.ceil((quiz_state['correct_answers'] / quiz_state['question_count']) * 100)
-
-        else:
-            context['quiz_completed'] = False
-
-        # check if an explanation exists for the question
-        explanation_text = load_quiz_question_explanation(question_id)
-        context['explanation_text'] = explanation_text
-   
     # rebuild the progress bar showing the answered status of each quiz question
     previous_answers = build_previous_answers(request, subtopic_id)
     if previous_answers:
-        context['previous_answers'] = json.dumps(previous_answers)  
+        context['previous_answers'] = json.dumps(previous_answers) 
 
+    # Only grade the question if button type is not 'resume'
+    if button_type != 'resume':
+        # determine if the question to be displayed has been previously answered
+        previously_answered = StudentAnswer.objects.filter(
+            learner = request.user,
+            subtopic_id = subtopic_id,
+            question_id = question_id
+        ).exists()
+
+        # if previously answered, return the choice ids for each answer choice selected
+        if previously_answered:
+            student_answers = get_student_answers(request, subtopic_id, question_id)
+
+            # grade the quiz question 
+            results_dict = create_results_dictionary(question_id, student_answers)
+            context['results_dict'] = json.dumps(results_dict) 
+            # needed for answered question formatting 
+            context['student_answers'] = json.dumps(student_answers)
+
+            # check if the quiz is complete
+            if not review_mode:
+                if quiz_state['question_count'] == quiz_state['questions_answered']:
+                    context['quiz_completed'] = True
+                    context['question_count'] = quiz_state['question_count']
+                    context['correct_answers'] = quiz_state['correct_answers']
+                    context['quiz_score'] = math.ceil((quiz_state['correct_answers'] / quiz_state['question_count']) * 100)
+
+                else:
+                    context['quiz_completed'] = False
+
+            # check if an explanation exists for the question
+            explanation_text = load_quiz_question_explanation(question_id)
+            context['explanation_text'] = explanation_text
+   
     return render(request, "quizes/quiz_layout.html", context)
 
-@login_required(login_url='login')
-def resume_quiz(request, subtopic_id):
-    # get the previously answered questions
-    answered_question_ids = get_previous_questions_answered(request, subtopic_id)
-
-    # retrieve the answer choice id for each question
-    for question_id in answered_question_ids:
-        student_answers = get_student_answers(request, subtopic_id, question_id)
-        get_previous_results(question_id, student_answers)
 
 @login_required(login_url='login')
 def process_quiz_question(request, subtopic_id, question_id):
@@ -192,9 +213,9 @@ def process_quiz_question(request, subtopic_id, question_id):
             # check if the progress record exists or must be created 
             try:           
                 Progress.objects.get(learner=request.user, subtopic_id=subtopic_id)
-                update_progress_record(request, subtopic_id, question_id)                
+                update_progress_record(request, subtopic_id, question_id, correct_answer)                
             except Progress.DoesNotExist:
-                create_progress_record(request, subtopic_id, question_id)
+                create_progress_record(request, subtopic_id, question_id, correct_answer)
 
             # save the student answers in the StudentAnswer model
             save_answers(request, subtopic_id, question_id, student_answers)
@@ -274,6 +295,26 @@ def grade_quiz(results_dict, question_type):
                 return False  
         return True
 
+def get_first_unanswered_question(subtopic_id, learner):
+    questions = list(
+        Question.objects.filter(subtopic_id=subtopic_id)
+        .order_by('display_order', 'id')
+    )
+
+    answered_ids = set(
+        StudentAnswer.objects.filter(
+            learner = learner,
+            subtopic_id = subtopic_id
+        ).values_list('question_id', flat=True).distinct()
+    )
+
+    for idx, question in enumerate(questions):
+        if question.id not in answered_ids:
+            page_number = idx + 1
+            return page_number
+        
+    return None # all questions answered
+
 @login_required(login_url='login') 
 @csrf_exempt 
 def get_previous_results(request, subtopic_id):
@@ -342,15 +383,19 @@ def get_previous_results(request, subtopic_id):
 
             
 @login_required(login_url='login')
-def create_progress_record(request, subtopic_id, question_id):  
-    # Create a Progress record if one does not already exist
-      
+def create_progress_record(request, subtopic_id, question_id, correct_answer):  
+    # Create a Progress record if one does not already exist      
     learner = request.user
+
+    total_correct = 0
+    if correct_answer:
+        total_correct = 1
     
     try:
         progress = Progress(learner=learner, 
                         subtopic_id=subtopic_id, 
-                        questions_answered=1,
+                        questions_answered = 1,
+                        total_correct = total_correct,
                         initial_score = 0,
                         latest_score = 0
                     )
@@ -362,13 +407,15 @@ def create_progress_record(request, subtopic_id, question_id):
         return render(request, "quizes/quiz_layout.html", context)
                
 @login_required(login_url='login')
-def update_progress_record(request, subtopic_id, question_id):    
+def update_progress_record(request, subtopic_id, question_id, correct_answer):    
     learner = request.user
 
     # create a Progress instance
     try:
         progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
         progress.questions_answered += 1 
+        if correct_answer:
+            progress.total_correct += 1  
         progress.save()
     except Progress.DoesNotExist:
         context = build_quiz_context(request, subtopic_id, question_id)
