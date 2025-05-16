@@ -34,7 +34,7 @@ def dashboard(request):
 @login_required(login_url='login')
 @never_cache
 def load_quiz_layout(request, subtopic_id, topic_id):
-    
+    print('here')
     # get topic name for title
     topic = get_object_or_404(Topic, id=topic_id)
     topic_name = topic.name
@@ -50,6 +50,13 @@ def load_quiz_layout(request, subtopic_id, topic_id):
     # get the button type and page number
     button_type = request.GET.get('button_type')
     page_number = int(request.GET.get('page', 1))
+
+    # if retaking a quiz, update the progress record and delete the previous quiz answers
+    if button_type == 'retake':
+        success = delete_student_answers(request, subtopic_id)
+        if not success:
+            # Prevent loading the quiz with stale or inconsistent data
+            return redirect('dashboard') 
 
     # if resuming a quiz, get the first unanswered question
     if button_type == 'resume':
@@ -315,71 +322,71 @@ def get_first_unanswered_question(subtopic_id, learner):
         
     return None # all questions answered
 
-@login_required(login_url='login') 
-@csrf_exempt 
-def get_previous_results(request, subtopic_id):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        student_answers = data.get("student_answers", [])
-        question_id = data.get("question_id", "")
+#@login_required(login_url='login') 
+#@csrf_exempt 
+#def get_previous_results(request, subtopic_id):
+#    if request.method == 'POST':
+#        data = json.loads(request.body)
+#        student_answers = data.get("student_answers", [])
+#        question_id = data.get("question_id", "")
 
-        question = get_object_or_404(Question, id=question_id)
+#        question = get_object_or_404(Question, id=question_id)
 
         # grade the quiz question                   
-        results_dict = {}
+#        results_dict = {}
 
         # get all the correct answers from the Choice model in list form. Using sets allows for easy comparisions
-        correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
+#        correct_choices = set(Choice.objects.filter(question=question, is_correct=True).values_list('id', flat=True))
 
         # create a set of student choices
-        student_selected_choices = set()
+#        student_selected_choices = set()
 
-        for answer in student_answers:
-            choice_id = int(answer)
+#        for answer in student_answers:
+#            choice_id = int(answer)
            
-            try:
-                choice = get_object_or_404(Choice, id=choice_id)
-                results_dict[choice_id] = {
-                    "is_correct": choice.is_correct,
-                    "selected_by_student": True
-                }
-                student_selected_choices.add(choice_id)
+#            try:
+#                choice = get_object_or_404(Choice, id=choice_id)
+#                results_dict[choice_id] = {
+#                    "is_correct": choice.is_correct,
+#                    "selected_by_student": True
+#                }
+#                student_selected_choices.add(choice_id)
                
-            except Choice.DoesNotExist:
-                return JsonResponse({"success": False, 
-                    "messages": [{"message": "Choice not found.", "tags": "danger"}]}, status=400)
+#            except Choice.DoesNotExist:
+#                return JsonResponse({"success": False, 
+#                    "messages": [{"message": "Choice not found.", "tags": "danger"}]}, status=400)
             
         # For multiple answer questions, there are 2 edge cases to consider:
         # 1) The student didn't choose all the correct answers
         # 2) The student chose all the correct answers but also chose an additional incorrect answer
 
         # student missed 1 or more correct answers
-        missed_correct_answers = correct_choices - student_selected_choices
+#        missed_correct_answers = correct_choices - student_selected_choices
         # student chose all the correct answers + 1 or more incorrect answers
-        extra_incorrect_answers = student_selected_choices - correct_choices
+#        extra_incorrect_answers = student_selected_choices - correct_choices
 
         # add missed correct answers to the results_dict. The student didn't choose all the correct answers
-        for choice_id in missed_correct_answers:
-            results_dict[choice_id] = {
-                "is_correct": True,
-                "selected_by_student": False
-            }
+#        for choice_id in missed_correct_answers:
+#            results_dict[choice_id] = {
+#                "is_correct": True,
+#                "selected_by_student": False
+#            }
 
         # add any extra incorrect answer to results_dict
-        for choice_id in extra_incorrect_answers:
+#        for choice_id in extra_incorrect_answers:
             # update existing entry to flag it as an extra incorrect answer
-            if choice_id in results_dict:
-                results_dict[choice_id]["is_extra_incorrect"] = True
-            else:
+#            if choice_id in results_dict:
+#                results_dict[choice_id]["is_extra_incorrect"] = True
+#            else:
                 # add to results_dict if not already present
-                results_dict[choice_id] = {
-                    "is_correct": False,
-                    "selected_by_student": True,
-                    "is_extra_incorrect": True
-                }
+#                results_dict[choice_id] = {
+#                    "is_correct": False,
+#                    "selected_by_student": True,
+#                    "is_extra_incorrect": True
+#                }
 
-        return JsonResponse({"success": True, "results_dict": results_dict, 
-                "question_type": question.question_type.name })
+#        return JsonResponse({"success": True, "results_dict": results_dict, 
+#                "question_type": question.question_type.name })
 
             
 @login_required(login_url='login')
@@ -543,7 +550,8 @@ def delete_student_answers(request, subtopic_id):
     
     # make sure the StudentAnswer records exist
     if not student_answers.exists():
-        messages.error("StudentAnswer records do not exist.") 
+        messages.error(request, "StudentAnswer records do not exist.") 
+        return False
 
     else:
 
@@ -552,7 +560,8 @@ def delete_student_answers(request, subtopic_id):
             progress = Progress.objects.get(learner=learner, subtopic_id=subtopic_id)
             
         except Progress.DoesNotExist:
-                messages.error("Progress record does not exist.") 
+                messages.error(request, "Progress record does not exist.") 
+                return False
 
         try:
             with transaction.atomic():
@@ -560,11 +569,14 @@ def delete_student_answers(request, subtopic_id):
                 
                 # update the Progress record
                 progress.questions_answered = 0
-                progress.latest_score = None
+                progress.total_correct = 0
+                progress.latest_score = 0
                 progress.save()
+                return True
 
         except Exception as e:           
-            messages.error(f"An error occurred: {str(e)}")
+            messages.error(request, f"An error occurred: {str(e)}")
+            return False
 
 def build_quiz_context(request, subtopic_id, question_id):
     question = get_object_or_404(Question, id=question_id)

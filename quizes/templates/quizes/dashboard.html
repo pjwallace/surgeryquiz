@@ -68,6 +68,16 @@
             
                 <div id="dashboard-msg" class="msg-div"></div>
 
+                <div class="error-msg">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {{ message.tags }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
                 <h2 class="text-center fs-2 fs-md-3 my-3">{{ request.user}}'s Dashboard</h2>
                 <p class="text-center fs-5 fs-md-6 mb-4" id="choose-assessment">Choose your assessment from the available topics:</p>
 
@@ -189,7 +199,8 @@
                                                     <!-- Review Button-->
                                                     <a href="{% url 'load_quiz_layout' subtopic.id topic.id %}?button_type=review"
                                                         class="btn btn-sm btn-info">Review</a>
-                                                    
+
+                                                    <!-- Retake Button-->
                                                     <button type="button" class="btn btn-sm btn-danger retake"
                                                         data-subtopic-id="{{ subtopic.id }}" data-topic-id="{{ topic.id }}"
                                                         data-question-count="{{ subtopic.question_count }}">Retake</button>
@@ -216,8 +227,9 @@
 
                     <div class="dialog-buttons">
                         <button type="button" id="cancel-button" class="btn btn-close"></button> 
-                        <!-- href will be set dynamically with Javascript --> 
-                        <a href="#" id="confirm-quiz-retake-button" class="btn btn-primary retake">Retake</a> 
+                        
+                        <a href="#" id="confirm-quiz-retake-button" class="btn btn-primary retake">Retake
+                        </a> 
 
                     </div>
                 </dialog>

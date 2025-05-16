@@ -15,21 +15,25 @@ document.addEventListener('DOMContentLoaded', function(){
         const topicId = clickedButton.dataset.topicId;
         if (!topicId) return;
 
-        const questionCount = clickedButton.dataset.questionCount;
-
         // process the retake button
         if (clickedButton.classList.contains('retake')){
-            setupRetakeQuizDialog(subtopicId, topicId, questionCount);
+            setupRetakeQuizDialog(subtopicId, topicId);
         } 
     });
 
+    document.getElementById('confirm-quiz-retake-button').addEventListener('click', function(e) {
+        e.preventDefault();  
+        const href = this.href;  // Read the current href set by setupRetakeQuizDialog
+        window.location.href = href;  // Navigate manually
+    });
+    
     document.getElementById('dashboard-container').addEventListener('click', function(e){
         if (e.target.tagName === 'BUTTON' && e.target.id === 'cancel-button'){
             cancelRetakeQuizDialog();
-        }
-        
+        }        
     });
 }); 
+
 function loadSubtopicsForQuizTopic(){
     document.getElementById('dashboard-container').addEventListener('click', function(e){           
             const topicDiv = e.target.closest('.topics');
@@ -56,7 +60,7 @@ function loadSubtopicsForQuizTopic(){
     })          
 }
 
-function setupRetakeQuizDialog(subtopicId, topicId, questionCount){
+function setupRetakeQuizDialog(subtopicId, topicId){
     const dialogElement = document.getElementById('confirm-retake-quiz-dialog');
     if (!dialogElement){
         console.error('Dialog element with ID confirm-retake-quiz-dialog not found.');

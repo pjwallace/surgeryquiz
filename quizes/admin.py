@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import Progress, StudentAnswer
 
 class ProgressAdmin(admin.ModelAdmin):
-    list_display = ('learner', 'subtopic', 'questions_answered', 'initial_score', 'latest_score', 
-                    'last_attempted')
+    list_display = ('learner', 'subtopic', 'questions_answered', 'total_correct', 'initial_score', 
+                    'latest_score', 'last_attempted')
     readonly_fields = ['last_attempted']
 
 class StudentAnswerAdmin(admin.ModelAdmin):
