@@ -94,23 +94,6 @@ function formatAnsweredQuestion(studentAnswers){
     }
 }
 
-//async function getPreviousStudentAnswers(subtopicId){
-//    const route = `/quizes/home/get_previous_student_answers/${subtopicId}`;
-//    try {
-//        const response = await fetch(route);
-//        const data = await response.json();
-//        if (data.success) {
-//            return data.answer_question_ids;
-//        } else {
-            // Handle the error case if needed
-//            return [];
-//        }
-//    } catch (error) {
-//        console.error("Error fetching student answers:", error);
-//        return [];
-//    }
-//}
-
 function displayQuizScoreDialog(){     
     const dialogElement = document.getElementById('quiz-score-dialog');
 
@@ -130,16 +113,17 @@ function cancelQuizScoreDialog(){
     }
 }
 
-function clearMessages(){
-    const messageContainer = document.querySelector('.error-msg');
-    const messageDiv = document.querySelector('.msg-div');
-    if (messageContainer) {
+//function clearMessages(){
+//
+//     const messageContainer = document.querySelector('.error-msg');
+//   const messageDiv = document.querySelector('.msg-div');
+//    if (messageContainer) {
         // Clear any existing messages
-        messageContainer.innerHTML = '';
-    }
-    if (messageDiv) {
+//        messageContainer.innerHTML = '';
+//    }
+//    if (messageDiv) {
         // Clear any existing messages
-        messageDiv.innerHTML = '';
-    }
-}
+//        messageDiv.innerHTML = '';
+//    }
+//}
 
