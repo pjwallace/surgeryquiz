@@ -279,7 +279,7 @@ dialog p {
 
 
 /* For screens between 577px and 768px */
-@media (min-width: 577px) and (max-width: 768px) {
+@media (min-width: 577px) and (max-width: 769px) {
     #progress-header,    
     #review-header,
     .progress-column,   

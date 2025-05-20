@@ -321,11 +321,6 @@ dialog p {
         grid-gap: 5px;
         padding: 10px;
         margin-bottom: 20px;
-        /*
-        margin-top: 10px;
-        margin-bottom: 20px;
-        z-index: auto;
-        */
     }
     #progress-container a {
         padding: 5px;
@@ -400,9 +395,19 @@ dialog p {
         margin-top: 8px;
         line-height: 1.4;
     }
+    #pagination-container-bottom {
+        margin-top: 20px;        /* Add space above buttons */
+        margin-bottom: 20px;     /* Keep bottom margin */
+        gap: 10px;               /* Optional: future use */
+    }
     #previous-button-bottom, #next-button-bottom {
         padding: 10px 15px;
-        margin: 5px 0;    
+        margin: 0;  
+        width: 100px;  
+    }
+    #pagination-container-bottom {
+        display: flex;
+        justify-content: space-around; /* Bring buttons closer together */
     }
     #explanation-container {
         margin-bottom: 0;
