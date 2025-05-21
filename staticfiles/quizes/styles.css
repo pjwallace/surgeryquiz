@@ -1,0 +1,395 @@
+body, html {
+    overflow: hidden; /* Prevent scrolling on the body */
+    height: 100%; /* Ensure the body and html elements take up the full viewport height */
+    margin: 0;
+    padding: 0;
+    background-color: #e8e8e8;
+}
+
+#brand{
+    margin-left: 15px;
+}
+
+#user-icon {
+    font-size: 1.5rem;
+    margin-right: 5px; 
+    cursor: pointer;
+}
+
+#logout-link{
+    margin-right: 15px;
+}
+
+.container-fluid {
+    margin-top: 0; 
+  
+}
+
+#dashboard-container{
+    box-sizing: border-box;
+    height: calc(100vh - 56px); 
+    width: 100%;
+    max-width: 95%;
+    margin: 0 auto;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    overflow-x: hidden; 
+    background-color: #D9D9D9;
+}
+
+.container {
+    padding: 0 15px; /* Add padding to prevent overflow */
+}
+
+#title-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.column-header{
+    background-color: #F7E7CE;
+    height: 35px; 
+    display: flex;
+    padding: 5px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#score-header, #review-header{
+    text-align: center;
+}
+
+.topics-list{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: larger;
+    height: 50px;
+    
+    background-color: lavender;
+    border: solid 1px darkgray;
+    cursor: pointer;
+    padding-left: 5px;    
+}
+
+.topics-list span{
+    margin-left: 10px;
+    line-height: normal;
+}
+
+.topics-list:hover{
+    background-color: #EEE0FF;
+}
+
+.subtopics-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    
+    height: 50px;
+    background-color: #FFF0F5;
+    border-bottom: solid 1px lightgray;
+    padding-left: 5px;
+}
+
+.subtopics-row .status-column,
+.subtopics-row .progress-column {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.subtopics-row .review-column,
+.subtopics-row .score-column{
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+
+.review-column {
+    gap: 20px; /* This will add 20px space between the review and reset buttons */
+    
+}
+
+.questions-text span{
+    display: block;
+    font-size: small;
+}
+
+#questions-progress{
+    font-size: medium;
+}
+
+.score-dash {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    width: 100%;
+    gap: 10px; /* Add consistent spacing between dashes */
+}
+
+.score-dash i{
+    font-size: 20px;       
+    color: blue;           
+    text-align: center;    
+}
+
+.score-dash i {
+    padding-right: 20px; /* Add padding for spacing between icons */
+    text-align: center;  
+}
+
+.minus-bigger {
+    font-size: 24px;
+    font-weight: bold;     
+    color: blue;
+}
+
+.score-dash i:last-child {
+    padding-right: 0; 
+}
+
+.score-label, .score-results {
+    display: flex;
+    justify-content: flex-start; /* Align content to the left */
+    gap: 10px; /* Add consistent spacing between spans */
+    width: 100%;
+    
+}
+
+.score-label{
+    font-size: small;
+}
+
+.score-results {
+    font-size: medium;
+}
+
+.score-label span, .score-results span {
+    flex: 1; /* Allow spans to share equal space */
+    text-align: left;
+    padding-right: 10px; 
+}
+
+.score-label span:last-child, .score-results span:last-child {
+    padding-right: 0; 
+}
+
+.score-results{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: medium;
+}
+/* Dialog box */
+dialog {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+}
+
+dialog::backdrop {
+    background-color: rgba(0,0,0,0.5);
+}
+
+dialog h5 {
+    margin: 0 0 10px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+dialog p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-top: 20px;
+}
+
+.dialog-buttons .btn {
+    padding: 10px 15px;
+    margin-right: 30px;
+}
+
+.btn-close {
+    background-color: lightgray;
+    color: black;
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 576px) {
+    #progress-header,
+    #score-header,
+    #review-header,
+    .progress-column,
+    .score-column,
+    .review-column {
+        display: none !important; /* Ensure they are fully hidden */
+    }
+
+    /* Make the headers row a flex container */
+    .column-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between; 
+    }
+
+    /* Make subtopic and status headers share space */
+    #subtopic-header {
+        flex: 2; /* Give more space to subtopic header */
+    }
+
+    #status-header {
+        flex: 1; /* Status header stays inline */
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    /* Override flex display to prevent empty columns from affecting layout */
+    .subtopics-row {
+        display: flex !important; 
+        align-items: center; 
+        justify-content: space-between; 
+        height: auto; 
+    }
+
+    /* Expand the name column */
+    .subtopics {
+        flex: 2; /* Allow subtopic name to take more space */
+    }
+
+    /* Keep the status column aligned with subtopics */
+    .status-column {
+        flex: 1; /* Adjust width to keep inline */
+        display: flex;
+        justify-content: flex-start; 
+        align-items: center;
+    }
+}
+
+
+/* For screens between 577px and 768px */
+@media (min-width: 577px) and (max-width: 769px) {
+    #progress-header,    
+    #review-header,
+    .progress-column,   
+    .review-column {
+        display: none !important; /* Ensure they are fully hidden */
+    }
+    /* Make the headers row a flex container */
+    .column-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between; 
+    }
+
+    /* Make subtopic and status headers share space */
+    #subtopic-header {
+        flex: 2; /* Give more space to subtopic header */
+    }
+
+    #status-header {
+        flex: 1.2; /* Status header stays inline */
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 10px;
+    }
+
+    #score-header {
+        flex: 1.5; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Override flex display to prevent empty columns from affecting layout */
+    .subtopics-row {
+        display: flex !important; 
+        align-items: center; 
+        justify-content: space-between; 
+        height: auto; 
+        flex-wrap: nowrap; 
+    }
+
+    /* Expand the name column */
+    .subtopics {
+        flex: 2; /* Allow subtopic name to take more space */
+        display: flex;
+        align-items: center;
+    }
+
+    /* Keep the status column aligned with subtopics */
+    .status-column {
+        flex: 1.2; /* Adjust width to keep inline */
+        display: flex;
+        justify-content: flex-start; 
+        align-items: center;
+        white-space: nowrap; 
+        margin-left: 10px;
+    }
+
+    .score-column {
+        display: flex; 
+        flex: 1.5;
+        align-items: center;
+        justify-content: center;
+    }
+
+}
+
+/* Adjust font size and layout for smaller screens */
+@media (max-width: 768px) {
+    .topics-list {
+        font-size: medium; /* Adjust font size for smaller screens */
+        padding-left: 5px; /* Reduce padding to minimize space from the left margin */
+        display: flex;
+        align-items: center; /* Center icon and text vertically */
+        flex-direction: row; /* Ensure icon and text are side by side */
+    }
+
+    .topics-list span:first-child {
+        display: flex; /* Ensure proper alignment */
+        align-items: center; /* Vertically center the text next to the icon */
+    }
+
+    .topics-list i {
+        margin-right: 5px; 
+    }
+    
+}
+
+/* Default layout for screens > 768px */
+@media (min-width: 769px) {
+    .subtopics-row {
+        display: flex;
+    }
+
+    #subtopic-header, .subtopics {
+        flex: 4; 
+    }
+
+    #status-header, .status-column {
+        flex: 1.6; 
+    }
+
+    #progress-header, .progress-column {
+        flex: 1.2; 
+    }
+   
+    #score-header, .score-column,
+    #review-header, .review-column {
+        flex: 2; 
+    }
+    
+}
