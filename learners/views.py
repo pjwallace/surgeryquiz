@@ -262,6 +262,11 @@ def edit_profile(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return render(request, 'learners/feedback.html')
+    #return HttpResponseRedirect(reverse("index"))
+
+def feedback(request):
+    return render(request, 'learners/feedback.html')
+
 
 

@@ -1,0 +1,21 @@
+{% extends "learners/base.html" %}
+
+{% block body %}
+
+    <div class="container mt-5 text-center">
+        <h2>Thank you for visiting TestYourSurgery.com</h2>
+        <p>If you have a few minutes to spare, I’d really appreciate your feedback.
+            It helps me improve the site and make it more valuable for surgical trainees like you.
+        </p>
+        <a href="https://forms.gle/jGKXC643Vc7rjUZE9" target="_blank" class="btn btn-primary btn-lg">
+            Submit Feedback
+        </a>
+
+        <p class="mt-4">
+            <a href="{% url 'login' %}">Back to Login</a>
+        </p>
+
+    </div>
+
+
+{% endblock %}
